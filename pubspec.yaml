@@ -46,7 +46,7 @@ dependencies:
   marquee: ^2.2.1
   flutter_rating_bar: ^4.0.0
 #  flutter_widget_from_html: ^0.14.11
-  flutter_widget_from_html:
+  flutter_widget_from_html_core: ^0.15.2
   fluttertoast: ^8.0.9
   permission_handler: ^11.1.0
   flutter_downloader: ^1.11.7
