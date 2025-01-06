@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "342067654039",
+    "project_id": "al-taiba-gold",
+    "storage_bucket": "al-taiba-gold.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:342067654039:android:77836c46bd014a8a4fa8d2",
+        "android_client_info": {
+          "package_name": "com.altaibagold.ordernow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7Mgb_ZnSOdLhWebQh4RmgKohBOXcoey0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version":"1"
+}
