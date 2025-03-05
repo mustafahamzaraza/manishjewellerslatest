@@ -51,7 +51,7 @@ android {
         applicationId "com.altaibagold.ordernow"
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
-        versionCode 10
+        versionCode 13
         versionName flutterVersionName
         multiDexEnabled true //new
     }

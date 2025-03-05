@@ -61,7 +61,7 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeAsync() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 1000));
     _route();
   }
 
@@ -250,20 +250,26 @@ class SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: Colors.amber[400],  // Golden color
+    //  backgroundColor: Colors.amber[400],  // Golden color
       key: _globalKey,
       body: Provider.of<SplashController>(context).hasConnection ?
-      Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-        BouncyWidget(
-            duration: const Duration(milliseconds: 2000), lift: 50, ratio: 0.5, pause: 0.25,
-            child: SizedBox(width: 150,
-                child: Image.asset(
-                    Images.white,
-                    width: 150.0))),
-        Text(AppConstants.appName,style: textRegular.copyWith(fontSize: Dimensions.fontSizeOverLarge, color: Colors.white)),
-        Padding(padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
-            child: Text(AppConstants.slogan,style: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.white)))]),
-      ) : const NoInternetOrDataScreenWidget(isNoInternet: true, child: SplashScreen()),
+      // Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      //   BouncyWidget(
+      //       duration: const Duration(milliseconds: 2000), lift: 50, ratio: 0.5, pause: 0.25,
+      //       child: SizedBox(width: 150,
+      //           child: Image.asset(
+      //               Images.white,
+      //               width: 150.0))),
+      //   Text(AppConstants.appName,style: textRegular.copyWith(fontSize: Dimensions.fontSizeOverLarge, color: Colors.white)),
+      //   Padding(padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+      //       child: Text(AppConstants.slogan,style: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.white)))]),
+      // )
+      SizedBox.expand(
+        child: Image.asset(Images.green, // Replace with your image path
+          fit: BoxFit.cover, // Ensures the image fills the entire screen
+        ),
+      )
+          : const NoInternetOrDataScreenWidget(isNoInternet: true, child: SplashScreen()),
     );
   }
 }

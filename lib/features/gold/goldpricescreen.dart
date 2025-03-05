@@ -110,11 +110,11 @@ class _GoldPriceScreenState extends State<GoldPriceScreen> {
                 SizedBox(height: 16),
 
                 // Gold Price Containers
-                goldPriceContainer("24KT Per Gram", price24k),
+                goldPriceContainer("24KT", price24k),
                 SizedBox(height: 12),
-                goldPriceContainer("22KT Per Gram", price22k),
+                goldPriceContainer("22KT", price22k),
                 SizedBox(height: 12),
-                goldPriceContainer("18KT Per Gram", price18k),
+                goldPriceContainer("18KT", price18k),
 
                 // Current Date-Time
                 SizedBox(height: 16),

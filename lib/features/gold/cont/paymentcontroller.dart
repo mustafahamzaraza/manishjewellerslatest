@@ -84,9 +84,9 @@ class PaymentDetailsController extends ChangeNotifier {
       final response = await http.get(Uri.parse('https://altaibagold.com/api/v1/goldPriceService'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        price18k = data['data']['price_gram']['18k_gst_included']?.toDouble();
-        price22k = data['data']['price_gram']['22k_gst_included']?.toDouble();
-        price24k = data['data']['price_gram']['24k_gst_included']?.toDouble();
+        price18k = data['data']['1_gram']['18k_gst_included']?.toDouble();
+        price22k = data['data']['1_gram']['22k_gst_included']?.toDouble();
+        price24k = data['data']['1_gram']['24k_gst_included']?.toDouble();
         print("response data $data");
         notifyListeners();
       } else {
