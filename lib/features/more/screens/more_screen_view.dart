@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/screens/login_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/features/gold/goldpricescreen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/gold/purchasedplansscreen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/loyaltyPoint/controllers/loyalty_point_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/order_details/screens/guest_track_order_screen.dart';
@@ -9,6 +10,8 @@ import 'package:flutter_sixvalley_ecommerce/features/restock/screens/restock_lis
 import 'package:flutter_sixvalley_ecommerce/features/splash/domain/models/config_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/support/screens/support_ticket_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/wallet/controllers/wallet_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/loanhistorylist.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/pp.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
 import 'package:flutter_sixvalley_ecommerce/features/more/widgets/logout_confirm_bottom_sheet_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/chat/screens/inbox_screen.dart';
@@ -31,6 +34,8 @@ import 'package:flutter_sixvalley_ecommerce/features/address/screens/address_lis
 import 'package:flutter_sixvalley_ecommerce/features/refer_and_earn/screens/refer_and_earn_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/setting/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
+import '../../../manishecommerceinvestment/goldratescreen.dart';
+import '../../../utill/colornew.dart';
 import '../../gold/paymentlistscreen.dart';
 import 'faq_screen_view.dart';
 import 'package:flutter_sixvalley_ecommerce/features/more/widgets/title_button_widget.dart';
@@ -81,7 +86,7 @@ class _MoreScreenState extends State<MoreScreen> {
             pinned: true,
             centerTitle: false,
             automaticallyImplyLeading: false,
-            backgroundColor: Theme.of(context).highlightColor,
+            backgroundColor: AppColors.glowingGold,
           collapsedHeight: 160,
           flexibleSpace: const ProfileInfoSectionWidget()),
 
@@ -126,14 +131,20 @@ class _MoreScreenState extends State<MoreScreen> {
                             navigateTo: const CouponList()),
 
 
-
                         //
-                        MenuButtonWidget(image: Images.bgLatest, title: 'Acquired Gold Plans',
-                            navigateTo: PurchasedPlansList()),
+                        MenuButtonWidget(image: Images.bgLatest, title: 'Acquired Investment Plans',
+                            navigateTo: PaymentHistoryList()),
+
                         MenuButtonWidget(image: Images.payWallet, title: 'Investment Ledger',
                             navigateTo: PaymentListScreen()),
 
 
+                        MenuButtonWidget(image: Images.bgLatest, title: 'Credits List',
+                            navigateTo: LoanHistoryList()),
+
+
+                        MenuButtonWidget(image: Images.bgLatest, title: 'Check Gold Rates',
+                            navigateTo: GoldPriceScreenT()),
 
                         if(!isGuestMode)
                           if(configModel!.refEarningStatus != null && configModel.refEarningStatus == "1")

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.altaibagold.ordernow"
+    package="com.banana.com"
     android:targetSandboxVersion="1" xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -35,7 +35,7 @@
     </queries>
 
     <application
-        android:label="Al-Taiba Gold"
+        android:label="Manish Gold Savings"
         android:extractNativeLibs="true"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"

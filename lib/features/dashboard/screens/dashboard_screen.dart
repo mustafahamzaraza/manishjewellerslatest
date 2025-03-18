@@ -11,6 +11,7 @@ import 'package:flutter_sixvalley_ecommerce/features/wishlist/controllers/wishli
 import 'package:flutter_sixvalley_ecommerce/helper/network_info.dart';
 import 'package:flutter_sixvalley_ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/main.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/drawer.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/features/dashboard/widgets/app_exit_card_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/chat/screens/inbox_screen.dart';
@@ -21,6 +22,8 @@ import 'package:flutter_sixvalley_ecommerce/features/home/screens/home_screens.d
 import 'package:flutter_sixvalley_ecommerce/features/more/screens/more_screen_view.dart';
 import 'package:flutter_sixvalley_ecommerce/features/order/screens/order_screen.dart';
 import 'package:provider/provider.dart';
+
+import '../../../utill/colornew.dart';
 
 class DashBoardScreen extends StatefulWidget {
   const DashBoardScreen({super.key});
@@ -123,7 +126,13 @@ class DashBoardScreenState extends State<DashBoardScreen> {
         return;
       },
       child: Scaffold(
-        key: _scaffoldKey,
+          key: _scaffoldKey,
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: AppColors.glowingGold,
+            //toolbarHeight: 0,
+          ),
+          drawer: CustomDrawer(),
 
         body: PageStorage(bucket: bucket, child: _screens[_pageIndex].screen),
         bottomNavigationBar: Container(height: 68,

@@ -10,8 +10,8 @@ class Images {
 
   static const String green = 'assets/images/green.jpg';
 
-  static const String logoImage = 'assets/images/golden.png';
-  static const String logoWithNameImage = 'assets/images/golden.png';
+  static const String logoImage = 'assets/images/golden.jpg';
+  static const String logoWithNameImage = 'assets/images/golden.jpg';
   static const String logoWithNameImageWhite = 'assets/images/white.png';
 
 
@@ -127,7 +127,7 @@ class Images {
 
   static const String white = 'assets/images/white.png';
 
-  static const String golden = 'assets/images/golden.png';
+  static const String golden = 'assets/images/golden.jpg';
 
   static const String username = 'assets/images/username.png';
   static const String loginBg = 'assets/images/login_bg.png';

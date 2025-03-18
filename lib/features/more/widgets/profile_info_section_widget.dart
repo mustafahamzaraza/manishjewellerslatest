@@ -11,6 +11,8 @@ import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widge
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/not_logged_in_bottom_sheet_widget.dart';
 import 'package:provider/provider.dart';
 
+import '../../../utill/colornew.dart';
+
 class ProfileInfoSectionWidget extends StatelessWidget {
   const ProfileInfoSectionWidget({super.key});
 
@@ -20,8 +22,10 @@ class ProfileInfoSectionWidget extends StatelessWidget {
     return Consumer<ProfileController>(
         builder: (context,profile,_) {
           return Container(decoration: BoxDecoration(
-              color: Provider.of<ThemeController>(context).darkTheme ?
-              Theme.of(context).primaryColor.withOpacity(.30) : Theme.of(context).primaryColor),
+  //            color: Provider.of<ThemeController>(context).darkTheme ?
+//              Theme.of(context).primaryColor.withOpacity(.30) : Theme.of(context).primaryColor
+               color: AppColors.glowingGold
+             ),
             child: Stack(children: [
               Container(transform: Matrix4.translationValues(-10, 0, 0),
                 child: Padding(padding: const EdgeInsets.only(top: 20.0),

@@ -46,6 +46,8 @@ import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 import 'package:provider/provider.dart';
 
+import '../../../manishecommerceinvestment/goldratescreen.dart';
+import '../../../manishecommerceinvestment/investmentPlans.dart';
 import '../../../utill/colornew.dart';
 import '../../gold/goldpricescreen.dart';
 import '../../gold/goldpurchaseplanscreen.dart';
@@ -224,7 +226,7 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => GoldPriceScreen(),
+                        builder: (context) => GoldPriceScreenT(),
                       ),
                     );
                   },
@@ -293,7 +295,7 @@ class _HomePageState extends State<HomePage> {
                     // Navigate to GoldPlansScreen
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const GoldPurchasePlansScreen()),
+                      MaterialPageRoute(builder: (context) => const RemainingPlansScreen()),
                     );
                   },
                   child: Container(
@@ -323,7 +325,7 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Purchase Gold Plans Now",
+                                "Purchase Investment Plans",
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

@@ -294,7 +294,8 @@ class AuthController with ChangeNotifier {
 
 //
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user_token', token);
+        // await prefs.setString('user_token', token);
+        await prefs.setString('auth_token', token);
 //
 
         authServiceInterface.saveUserToken(token);

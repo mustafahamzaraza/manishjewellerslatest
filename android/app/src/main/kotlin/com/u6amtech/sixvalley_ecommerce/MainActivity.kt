@@ -1,4 +1,4 @@
-package com.altaibagold.ordernow
+package com.banana.com
 
 import io.flutter.embedding.android.FlutterActivity
 

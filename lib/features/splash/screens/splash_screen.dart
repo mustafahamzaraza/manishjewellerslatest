@@ -248,28 +248,171 @@ class SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final double iconSize = size.width * 0.50; // MJ icon scales with screen width
+    final double circularSize = size.width * 0.15; // Circular icon scales too
+    final double textSize = size.width * 0.08; // Adjust text size dynamically
+    final double buttonHeight = size.height * 0.07; // Button adapts to screen
 
     return Scaffold(
-    //  backgroundColor: Colors.amber[400],  // Golden color
+      backgroundColor: Colors.white,
       key: _globalKey,
-      body: Provider.of<SplashController>(context).hasConnection ?
-      // Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      //   BouncyWidget(
-      //       duration: const Duration(milliseconds: 2000), lift: 50, ratio: 0.5, pause: 0.25,
-      //       child: SizedBox(width: 150,
-      //           child: Image.asset(
-      //               Images.white,
-      //               width: 150.0))),
-      //   Text(AppConstants.appName,style: textRegular.copyWith(fontSize: Dimensions.fontSizeOverLarge, color: Colors.white)),
-      //   Padding(padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
-      //       child: Text(AppConstants.slogan,style: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.white)))]),
-      // )
-      SizedBox.expand(
-        child: Image.asset(Images.green, // Replace with your image path
-          fit: BoxFit.cover, // Ensures the image fills the entire screen
+      //     body: Provider.of<SplashController>(context).hasConnection ?
+      body:
+
+      Provider.of<SplashController>(context).hasConnection ?  SingleChildScrollView(
+
+        child: Column(
+          children: [
+            SizedBox(
+              height: size.height, // Full-screen height
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // MJ Icon (Main)
+                  Positioned(
+                    top: size.height * 0.07, // Dynamic positioning
+                    child: Image.asset(
+                      'assets/images/mjicon.jpg',
+                      height: iconSize,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+
+                  // Small circular icon
+                  Positioned(
+                    top: size.height * 0.32,
+                    right: size.width * 0.2,
+                    child: Container(
+                      width: circularSize,
+                      height: circularSize,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.red,
+                      ),
+                      child: Image.asset(
+                        'assets/images/circular.jpg',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+
+                  // Second circular image
+                  Positioned(
+                    top: size.height * 0.4,
+                    left: size.width * 0.1,
+                    child: Container(
+                      width: size.width * 0.6, // Scales with screen width
+                      height: size.width * 0.6,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: Image.asset(
+                        'assets/images/cur2.png',
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                  ),
+
+                  // Text Section
+                  Positioned(
+                    bottom: size.height * 0.2,
+                    left: size.width * 0.1,
+                    right: size.width * 0.1,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown, // Prevents text overflow
+                      child: Text(
+                        "\tEmpowering\nYour\nGold\nInvestments",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            height: 1.1,
+                            fontSize: MediaQuery.of(context).size.height/34
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // "Manage.Track.Grow." Button
+                  Positioned(
+                    bottom: size.height * 0.08,
+                    left: size.width * 0.1,
+                    right: size.width * 0.1,
+                    child: SizedBox(
+                      height: buttonHeight,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber, // Adjusted to gold
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Manage.Track.Grow.",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_right_alt_sharp,
+                              size: 30,
+                              color: Colors.black,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      )
-          : const NoInternetOrDataScreenWidget(isNoInternet: true, child: SplashScreen()),
+      ) : const NoInternetOrDataScreenWidget(isNoInternet: true, child: SplashScreen()),
+
+
     );
   }
+
+
+  // @override
+  // Widget build(BuildContext context) {
+  //
+  //   return Scaffold(
+  //   //  backgroundColor: Colors.amber[400],  // Golden color
+  //     key: _globalKey,
+  //     body: Provider.of<SplashController>(context).hasConnection ?
+  //     // Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+  //     //   BouncyWidget(
+  //     //       duration: const Duration(milliseconds: 2000), lift: 50, ratio: 0.5, pause: 0.25,
+  //     //       child: SizedBox(width: 150,
+  //     //           child: Image.asset(
+  //     //               Images.white,
+  //     //               width: 150.0))),
+  //     //   Text(AppConstants.appName,style: textRegular.copyWith(fontSize: Dimensions.fontSizeOverLarge, color: Colors.white)),
+  //     //   Padding(padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+  //     //       child: Text(AppConstants.slogan,style: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.white)))]),
+  //     // )
+  //     // FittedBox(
+  //     //   child: Image.asset(Images.green, // Replace with your image path
+  //     //     fit: BoxFit.contain, // Ensures the image fills the entire screen
+  //     //   ),
+  //     // )
+  //     Image.asset(
+  //       Images.green,// Replace with your image path
+  //       width: double.infinity,
+  //       height: double.infinity,
+  //       fit: BoxFit.cover, // Ensures the image fills the screen
+  //     )
+  //         : const NoInternetOrDataScreenWidget(isNoInternet: true, child: SplashScreen()),
+  //   );
+  // }
 }
