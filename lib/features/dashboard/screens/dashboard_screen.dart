@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/screens/cart_screen.dart';
@@ -22,7 +24,9 @@ import 'package:flutter_sixvalley_ecommerce/features/home/screens/home_screens.d
 import 'package:flutter_sixvalley_ecommerce/features/more/screens/more_screen_view.dart';
 import 'package:flutter_sixvalley_ecommerce/features/order/screens/order_screen.dart';
 import 'package:provider/provider.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../manishecommerceinvestment/notification.dart';
 import '../../../utill/colornew.dart';
 
 class DashBoardScreen extends StatefulWidget {
@@ -40,6 +44,48 @@ class DashBoardScreenState extends State<DashBoardScreen> {
   bool singleVendor = false;
 
 
+  Future<String?> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_token');
+  }
+  
+  String name = '';
+  
+  Future<void> fetchProfileData({required String newAddress}) async {
+    String? token = await getToken();
+    try {
+      final response = await http.post(
+        Uri.parse('http://manish-jewellers.com/api/update'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          "name": '',
+          "email": '',
+          "mobile_no": '',
+          "address": ''
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('profile details $data');
+
+        if (data['status'] == true) {
+          setState(() {
+            name = data['data']['name'] ?? 'User'; // Default to empty string if null
+          });
+        } else {
+          print("Profile fetch failed");
+        }
+      } else {
+        print("API call failed");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
 
 
   @override
@@ -129,8 +175,23 @@ class DashBoardScreenState extends State<DashBoardScreen> {
           key: _scaffoldKey,
           appBar: AppBar(
             elevation: 0,
+            title:
+            _pageIndex == 0 ? Text('Welcome! ${name}',style: TextStyle(color: Colors.black),) : _pageIndex == 1 ? Text('Messages',style: TextStyle(color: Colors.black),) : Text(""),
             backgroundColor: AppColors.glowingGold,
             //toolbarHeight: 0,
+            actions: [  // Suffix Icons
+              IconButton(
+                icon: Icon(Icons.notifications,color: Colors.redAccent,),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NotificationScreen()),
+                  );
+
+                  // Handle notification icon press
+                },
+              ),
+            ],
           ),
           drawer: CustomDrawer(),
 
