@@ -1092,6 +1092,7 @@ Future<void> payOffline(BuildContext context, String amount,String planCode,Stri
     else {
       print(response.reasonPhrase);
       print('no status ${response.statusCode}');
+      print('token? == $token');
     }
 
 

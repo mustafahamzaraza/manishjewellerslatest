@@ -87,7 +87,7 @@ class _RemainingPlansScreenState extends State<RemainingPlansScreen> {
                       ),
                     ),
                     Text(
-                      "Remaining Investment\nPlans",
+                      "Investment\nPlans",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,

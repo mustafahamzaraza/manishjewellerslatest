@@ -2,7 +2,7 @@ import 'package:flutter_sixvalley_ecommerce/localization/models/language_model.d
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 
 class AppConstants {
-  static const String appName = 'Al Taiba Gold';
+  static const String appName = 'Manish Gold Savings';
   static const String slogan = 'Crafting Legacies with Every Gram';
   static const String appVersion = '14.9'; ///Flutter SDK: 3.24.3
 
