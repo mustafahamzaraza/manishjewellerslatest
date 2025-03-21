@@ -125,6 +125,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
    }
 
    debugStreamValues(); // Debugging
+
+   selectedPaymentMethod = 'Cash';
+
  }
 
 
@@ -417,6 +420,32 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                            },
                          ),
                          Text("Cash"),
+                       ],
+                     ),
+                     Row(
+                       mainAxisSize: MainAxisSize.min,
+                       children: [
+                         Radio<String>(
+                           value: 'Auto',
+                           groupValue: selectedPaymentMethod,
+                           onChanged: (value) {
+                             setState(() {
+                               selectedPaymentMethod = value!;
+                             });
+                             showDialog(
+                               context: context,
+                               builder: (context) {
+                                 return DailySavingsDialog(
+                                   onSetupSavings: (double deductedAmount, double goldAcquiredtx) {
+                                     _processRazorpayPayment(context, deductedAmount, goldAcquiredtx);
+                                   },
+                                 );
+                               },
+                             );
+
+                           },
+                         ),
+                         Text("Automated Payment"),
                        ],
                      ),
                      // Row(
@@ -973,6 +1002,146 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
     );
   }
 }
+
+
+
+class DailySavingsDialog extends StatefulWidget {
+  final Function(double, double) onSetupSavings; // Callback function
+
+  DailySavingsDialog({required this.onSetupSavings});
+
+  @override
+  _DailySavingsDialogState createState() => _DailySavingsDialogState();
+}
+
+class _DailySavingsDialogState extends State<DailySavingsDialog> {
+  final TextEditingController _amountController = TextEditingController();
+  int selectedAmount = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    _amountController.text = selectedAmount.toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Daily Savings",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                )
+              ],
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Reach your goal",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            Text(
+              "3X faster by saving daily",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.pink),
+            ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(Icons.savings, color: Colors.amber),
+                SizedBox(width: 5),
+                Text("Your money is saved in 24K gold")
+              ],
+            ),
+            SizedBox(height: 10),
+            Text("Enter amount you want to save daily"),
+            SizedBox(height: 5),
+            TextField(
+              controller: _amountController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                prefixText: "₹ ",
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              children: [10, 30, 70, 100, 500].map((amount) {
+                return ChoiceChip(
+                  label: Text("₹$amount",
+                      style: TextStyle(
+                          color: selectedAmount == amount ? Colors.white : Colors.black)),
+                  selected: selectedAmount == amount,
+                  selectedColor: Colors.purple,
+                  backgroundColor: Colors.grey[300],
+                  onSelected: (selected) {
+                    setState(() {
+                      selectedAmount = amount;
+                      _amountController.text = amount.toString();
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 15),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                minimumSize: Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () {
+                double amount = double.tryParse(_amountController.text) ?? 0.0;
+                double goldAcquired = amount / 6000; // Example price per gram
+
+                if (amount > 0) {
+                  Navigator.pop(context); // Close the dialog first
+                  Future.delayed(Duration(milliseconds: 300), () {
+                    widget.onSetupSavings(amount, goldAcquired);
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Please enter a valid amount")),
+                  );
+                }
+              },
+              child: Text("Setup Daily Savings", style: TextStyle(color: Colors.white)),
+            ),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset("assets/images/gpay.png", height: 20),
+                SizedBox(width: 10),
+                SizedBox(width: 10),
+                Image.asset("assets/images/rpay.png", height: 60),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+
 
 void _showQRDialog(BuildContext context) {
   showDialog(

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:carousel_slider/carousel_slider.dart';
 
 import '../features/dashboard/screens/dashboard_screen.dart';
@@ -19,7 +19,7 @@ class InvestmentPaymentDetails extends StatefulWidget {
 class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
   List<Map<String, dynamic>> paymentPlans = [];
   int _currentIndex = 0;
-  // List<charts.Series<_ChartData, int>> graphData = [];
+  List<charts.Series<_ChartData, int>> graphData = [];
 
   @override
   void initState() {
@@ -54,7 +54,7 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
           if (mounted) {
             setState(() {
               paymentPlans = List<Map<String, dynamic>>.from(jsonData['data']);
-           //   updateGraphData();
+              updateGraphData();
             });
           }
         }
@@ -67,28 +67,28 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
 
 
 
-  // void updateGraphData() {
-  //   if (paymentPlans.isEmpty) return;
-  //
-  //   List<Map<String, dynamic>> details =
-  //   List<Map<String, dynamic>>.from(paymentPlans[_currentIndex]['details'] ?? []);
-  //
-  //   setState(() {
-  //     graphData = [
-  //       charts.Series<_ChartData, int>(
-  //         id: 'Payments',
-  //         colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-  //         domainFn: (_ChartData data, _) => data.index,
-  //         measureFn: (_ChartData data, _) => data.payment,
-  //         data: details.asMap().entries.map((entry) {
-  //           int index = entry.key;
-  //           double payment = double.tryParse(entry.value['payment_amount'].toString()) ?? 0;
-  //           return _ChartData(index, payment);
-  //         }).toList(),
-  //       ),
-  //     ];
-  //   });
-  // }
+  void updateGraphData() {
+    if (paymentPlans.isEmpty) return;
+
+    List<Map<String, dynamic>> details =
+    List<Map<String, dynamic>>.from(paymentPlans[_currentIndex]['details'] ?? []);
+
+    setState(() {
+      graphData = [
+        charts.Series<_ChartData, int>(
+          id: 'Payments',
+          colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+          domainFn: (_ChartData data, _) => data.index,
+          measureFn: (_ChartData data, _) => data.payment,
+          data: details.asMap().entries.map((entry) {
+            int index = entry.key;
+            double payment = double.tryParse(entry.value['payment_amount'].toString()) ?? 0;
+            return _ChartData(index, payment);
+          }).toList(),
+        ),
+      ];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -409,52 +409,51 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
     }
 
     return Expanded(
-     child: Text(""),
-      // child: Padding(
-      //   padding: EdgeInsets.only(top: 0, left: 15, right: 15),
-      //   child: charts.LineChart(
-      //     [
-      //       charts.Series<_ChartData, int>(
-      //         id: 'Payments',
-      //         colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-      //         domainFn: (data, _) => data.index,
-      //         measureFn: (data, _) => data.payment,
-      //         data: chartData,
-      //         strokeWidthPxFn: (_, __) => 3, // Thicker line
-      //         insideLabelStyleAccessorFn: (_, __) => charts.TextStyleSpec(
-      //           fontSize: 14,
-      //           color: charts.MaterialPalette.black,
-      //         ),
-      //       )
-      //     ],
-      //     animate: true,
-      //     defaultRenderer: charts.LineRendererConfig(
-      //       includePoints: true, // Show rounded data points
-      //       radiusPx: 5.0, // Larger point size
-      //     ),
-      //     primaryMeasureAxis: charts.NumericAxisSpec(
-      //       renderSpec: charts.GridlineRendererSpec(
-      //         lineStyle: charts.LineStyleSpec(
-      //           dashPattern: [4, 4], // Subtle grid lines
-      //         ),
-      //         labelStyle: charts.TextStyleSpec(
-      //           fontSize: 12,
-      //           color: charts.MaterialPalette.black,
-      //         ),
-      //       ),
-      //     ),
-      //     domainAxis: charts.NumericAxisSpec( // Changed to NumericAxisSpec
-      //       renderSpec: charts.GridlineRendererSpec(
-      //         labelStyle: charts.TextStyleSpec(
-      //           fontSize: 14,
-      //           color: charts.MaterialPalette.black,
-      //         ),
-      //         lineStyle: charts.LineStyleSpec(thickness: 2),
-      //       ),
-      //     ),
-      //     behaviors: [charts.ChartTitle('Weekly Payments', titleStyleSpec: charts.TextStyleSpec(fontSize: 16, fontWeight: 'bold'))],
-      //   ),
-      // ),
+      child: Padding(
+        padding: EdgeInsets.only(top: 0, left: 15, right: 15),
+        child: charts.LineChart(
+          [
+            charts.Series<_ChartData, int>(
+              id: 'Payments',
+              colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+              domainFn: (data, _) => data.index,
+              measureFn: (data, _) => data.payment,
+              data: chartData,
+              strokeWidthPxFn: (_, __) => 3, // Thicker line
+              insideLabelStyleAccessorFn: (_, __) => charts.TextStyleSpec(
+                fontSize: 14,
+                color: charts.MaterialPalette.black,
+              ),
+            )
+          ],
+          animate: true,
+          defaultRenderer: charts.LineRendererConfig(
+            includePoints: true, // Show rounded data points
+            radiusPx: 5.0, // Larger point size
+          ),
+          primaryMeasureAxis: charts.NumericAxisSpec(
+            renderSpec: charts.GridlineRendererSpec(
+              lineStyle: charts.LineStyleSpec(
+                dashPattern: [4, 4], // Subtle grid lines
+              ),
+              labelStyle: charts.TextStyleSpec(
+                fontSize: 12,
+                color: charts.MaterialPalette.black,
+              ),
+            ),
+          ),
+          domainAxis: charts.NumericAxisSpec( // Changed to NumericAxisSpec
+            renderSpec: charts.GridlineRendererSpec(
+              labelStyle: charts.TextStyleSpec(
+                fontSize: 14,
+                color: charts.MaterialPalette.black,
+              ),
+              lineStyle: charts.LineStyleSpec(thickness: 2),
+            ),
+          ),
+          behaviors: [charts.ChartTitle('Weekly Payments', titleStyleSpec: charts.TextStyleSpec(fontSize: 16, fontWeight: 'bold'))],
+        ),
+      ),
     );
   }
 
@@ -472,10 +471,6 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
     }
     return data;
   }
-
-
-
-
 }
 
 

@@ -52,7 +52,7 @@ android {
         applicationId = "com.banana.com"
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
-        versionCode 13
+        versionCode 20
         versionName flutterVersionName
         multiDexEnabled true //new
     }

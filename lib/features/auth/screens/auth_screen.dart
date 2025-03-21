@@ -57,7 +57,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             return Column(children: [
                 Stack(children: [
 
-                  Container(height: 200, decoration: BoxDecoration(color: Theme.of(context).primaryColor)),
+                  Container(height: 200, decoration: BoxDecoration(color:
+                  Theme.of(context).primaryColor
+                  )),
                   Image.asset(Images.loginBg,fit: BoxFit.cover,height: 200, opacity : const AlwaysStoppedAnimation(.15)),
 
                   Padding(padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * .05),

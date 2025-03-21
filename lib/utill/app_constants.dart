@@ -6,7 +6,8 @@ class AppConstants {
   static const String slogan = 'Crafting Legacies with Every Gram';
   static const String appVersion = '14.9'; ///Flutter SDK: 3.24.3
 
-  static const String baseUrl = 'https://altaibagold.com/';
+   //static const String baseUrl = 'https://altaibagold.com/';
+  static const String baseUrl = 'https://manish-jewellers.com/';
 
   static const String userId = 'userId';
   static const String name = 'name';
