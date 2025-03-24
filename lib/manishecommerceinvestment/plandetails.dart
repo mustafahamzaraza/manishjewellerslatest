@@ -1016,7 +1016,7 @@ class DailySavingsDialog extends StatefulWidget {
 
 class _DailySavingsDialogState extends State<DailySavingsDialog> {
   final TextEditingController _amountController = TextEditingController();
-  int selectedAmount = 30;
+  int selectedAmount = 50;
 
   @override
   void initState() {
@@ -1078,7 +1078,7 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> {
             SizedBox(height: 10),
             Wrap(
               spacing: 10,
-              children: [10, 30, 70, 100, 500].map((amount) {
+              children: [50, 100, 150, 200, 500].map((amount) {
                 return ChoiceChip(
                   label: Text("₹$amount",
                       style: TextStyle(
@@ -1106,7 +1106,7 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> {
                 double amount = double.tryParse(_amountController.text) ?? 0.0;
                 double goldAcquired = amount / 6000; // Example price per gram
 
-                if (amount > 0) {
+                if (amount >= 50) {
                   Navigator.pop(context); // Close the dialog first
                   Future.delayed(Duration(milliseconds: 300), () {
                     widget.onSetupSavings(amount, goldAcquired);
