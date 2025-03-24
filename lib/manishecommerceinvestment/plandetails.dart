@@ -587,7 +587,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       planDuration = '28 Months (24+4)';
       planDescription = 'Invest for 24 months, & we pay your 25–28th installment!';
       planDetails = "Details: Customers pay for 24 months\nand Manish Jewellers add the \ninstallment.The amount added will be \nbased on the monthly average of the\n customer's installments."; // Example text for plan 3
-      details2 = "Example: If a customer pays Rs10,000 \nper month for 24 months, Manish\n Jewellers will contribute 25th,26th,\n27th and 28th installment.\n(i.e. 10,000x4 =Rs40,0000)";
+      details2 = "Example: If a customer pays Rs10,000 \nper month for 24 months, Manish\n Jewellers will contribute 25th,26th,\n27th and 28th installment.\n(i.e. 10,000x4 = Rs40,000)";
     }
 
     return Scaffold(
