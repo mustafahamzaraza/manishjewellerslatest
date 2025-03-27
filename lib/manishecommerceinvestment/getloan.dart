@@ -47,7 +47,7 @@ class _LoanScreenState extends State<LoanScreen> {
 
     var request = http.Request(
       'GET',
-      Uri.parse('https://manish-jewellers.com/api/loan/request?installment_id=$id'),
+      Uri.parse('https://manish-jewellers.com/api/v1/loan/request?installment_id=$id'),
     );
     request.headers.addAll(headers);
     inid = widget.id.toString();
@@ -651,7 +651,7 @@ Future<void> payOfflineLoan(BuildContext context, String amount, String months, 
 
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('https://manish-jewellers.com/api/loan/confirm-payment'),
+        Uri.parse('https://manish-jewellers.com/api/v1/loan/confirm-payment'),
       );
 
       request.fields.addAll({

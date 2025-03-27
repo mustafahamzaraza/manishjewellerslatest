@@ -131,7 +131,7 @@ class _MoreScreenState extends State<MoreScreen> {
                             navigateTo: const CouponList()),
 
 
-                        //
+
                         MenuButtonWidget(image: Images.bgLatest, title: 'Acquired Investment Plans',
                             navigateTo: PaymentHistoryList()),
 

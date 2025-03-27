@@ -41,7 +41,7 @@ class _LoanHistoryDetailsListState extends State<LoanHistoryDetailsList> {
     var headers = {'Accept': 'application/json', 'Authorization': 'Bearer $token'};
     var request = http.MultipartRequest(
       'GET',
-      Uri.parse('https://manish-jewellers.com/api/loan/list'),
+      Uri.parse('https://manish-jewellers.com/api/v1/loan/list'),
     );
 
     request.headers.addAll(headers);

@@ -23,7 +23,7 @@ class _RemainingPlansScreenState extends State<RemainingPlansScreen> {
 
   Future<void> fetchUserPlans() async {
     String? token = await getToken();
-    final String url = 'http://manish-jewellers.com/api/user-plans';
+    final String url = 'http://manish-jewellers.com/api/v1/user-plans';
     try {
       final response = await http.get(
         Uri.parse(url),

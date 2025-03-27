@@ -35,7 +35,7 @@ class _LedgerHistoryScreenState extends State<LedgerHistoryScreen> {
     if (token == null) return;
 
     var headers = {'Accept': 'application/json', 'Authorization': 'Bearer $token'};
-    var request = http.MultipartRequest('GET', Uri.parse('https://manish-jewellers.com/api/installment-payment/list'));
+    var request = http.MultipartRequest('GET', Uri.parse('https://manish-jewellers.com/api/v1/installment-payment/list'));
     request.headers.addAll(headers);
 
     try {

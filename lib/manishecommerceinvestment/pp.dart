@@ -50,7 +50,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
 
   Future<void> fetchGoldPrices() async {
-    const String apiUrl = "https://manish-jewellers.com/api/goldPriceService";
+    const String apiUrl = "https://manish-jewellers.com/api/v1/goldPriceService";
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -117,10 +117,11 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
   Future<void> fetchAdvertisements() async {
     try {
-      var response = await http.get(Uri.parse('https://manish-jewellers.com/api/advertisements'));
+      var response = await http.get(Uri.parse('https://manish-jewellers.com/api/v1/advertisements'));
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
+        print('$data');
         setState(() {
           advertisements = List<Map<String, dynamic>>.from(data['data']);
           isLoading = false;
@@ -317,7 +318,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     String? token = await getToken();
     try {
       final response = await http.post(
-        Uri.parse('http://manish-jewellers.com/api/update'),
+        Uri.parse('http://manish-jewellers.com/api/v1/update'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -388,7 +389,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('https://manish-jewellers.com/api/online-payment'),
+        Uri.parse('https://manish-jewellers.com/api/v1/online-payment'),
       );
 
       String getCurrentDate() {
@@ -536,7 +537,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     var headers = {'Accept': 'application/json', 'Authorization': 'Bearer $token'};
     var request = http.MultipartRequest(
       'GET',
-      Uri.parse('https://manish-jewellers.com/api/installment-payment/list'),
+      Uri.parse('https://manish-jewellers.com/api/installment-payment/v1/list'),
     );
 
     request.headers.addAll(headers);
@@ -1138,7 +1139,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
           'Authorization': 'Bearer $token',
         };
 
-        var request = http.MultipartRequest('POST', Uri.parse('https://manish-jewellers.com/api/payments'));
+        var request = http.MultipartRequest('POST', Uri.parse('https://manish-jewellers.com/api/v1/payments'));
 
         request.fields.addAll({
           'plan_amount': amount,

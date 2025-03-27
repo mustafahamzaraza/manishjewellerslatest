@@ -25,7 +25,7 @@ class _GoldCaratScreenState extends State<GoldCaratScreen> {
 
   // Fetch Gold Prices from API
   Future<void> fetchGoldPrices() async {
-    const String apiUrl = "https://manish-jewellers.com/api/goldPriceService";
+    const String apiUrl = "https://manish-jewellers.com/api/v1/goldPriceService";
 
     try {
       final response = await http.get(Uri.parse(apiUrl));

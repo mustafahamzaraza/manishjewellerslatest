@@ -51,7 +51,7 @@ class _ProfileScreenTState extends State<ProfileScreenT> {
 
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('https://manish-jewellers.com/api/logout'),
+        Uri.parse('https://manish-jewellers.com/api/v1/logout'),
       );
 
       request.headers.addAll(headers);
@@ -142,7 +142,7 @@ class _ProfileScreenTState extends State<ProfileScreenT> {
     String? token = await getToken();
     try {
       final response = await http.post(
-        Uri.parse('http://manish-jewellers.com/api/update'),
+        Uri.parse('http://manish-jewellers.com/api/v1/update'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

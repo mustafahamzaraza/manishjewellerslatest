@@ -19,7 +19,7 @@ class _GoldPriceScreenTState extends State<GoldPriceScreenT> {
   TextEditingController cityController = TextEditingController();
 
   Future<void> fetchGoldPrices() async {
-    const String apiUrl = "https://manish-jewellers.com/api/goldPriceService";
+    const String apiUrl = "https://manish-jewellers.com/api/v1/goldPriceService";
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -41,6 +41,7 @@ class _GoldPriceScreenTState extends State<GoldPriceScreenT> {
           price18k = price22k = price24k = "Error fetching price";
           currentDateTime = "Error fetching time";
         });
+        print('status ${response.statusCode}');
       }
     } catch (e) {
       setState(() {

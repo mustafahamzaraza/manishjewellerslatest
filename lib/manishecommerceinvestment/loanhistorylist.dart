@@ -44,7 +44,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
     var headers = {'Accept': 'application/json', 'Authorization': 'Bearer $token'};
     var request = http.MultipartRequest(
       'GET',
-      Uri.parse('https://manish-jewellers.com/api/loan/list'),
+      Uri.parse('https://manish-jewellers.com/api/v1/loan/list'),
     );
 
     request.headers.addAll(headers);
@@ -78,7 +78,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
     String? token = await getToken();
     try {
       final response = await http.post(
-        Uri.parse('http://manish-jewellers.com/api/update'),
+        Uri.parse('http://manish-jewellers.com/api/v1/update'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -659,7 +659,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
 
     var emiamountremain = selectedPlan['emi_amount_remaining'];
 
-    var url = Uri.parse('https://manish-jewellers.com/api/loan/confirm-payment');
+    var url = Uri.parse('https://manish-jewellers.com/api/v1/loan/confirm-payment');
 
     var headers = {
       'Accept': 'application/json',

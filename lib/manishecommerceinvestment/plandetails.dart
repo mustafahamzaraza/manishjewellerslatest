@@ -40,7 +40,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
 
   Future<void> fetchGoldPrices() async {
-   const String apiUrl = "https://manish-jewellers.com/api/goldPriceService";
+   const String apiUrl = "https://manish-jewellers.com/api/v1/goldPriceService";
 
    try {
      final response = await http.get(Uri.parse(apiUrl));
@@ -221,7 +221,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
      var request = http.MultipartRequest(
        'POST',
-       Uri.parse('https://manish-jewellers.com/api/online-payment'),
+       Uri.parse('https://manish-jewellers.com/api/v1/online-payment'),
      );
 
      String getCurrentDate() {
@@ -481,6 +481,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                        ),
                      ),
                      onPressed:  () {
+                       print("method: ${selectedPaymentMethod}");
                        if (selectedPaymentMethod == 'Cash') {
                          String offlineAmount = _offlineController.text.trim();
                          double? amount = double.tryParse(offlineAmount);
@@ -493,6 +494,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
                            payOffline(context, offlineAmount,planCat.toString(),planName.toString(), goldAcquired.toString()); // adjust as needed
 
+
+                           print("yes");
 
                          }
                        }
@@ -1213,7 +1216,7 @@ Future<void> payOffline(BuildContext context, String amount,String planCode,Stri
       'Authorization': 'Bearer $token', // Use the token in the Authorization header
     };
 
-    var request = http.MultipartRequest('POST', Uri.parse('https://manish-jewellers.com/api/payments'));
+    var request = http.MultipartRequest('POST', Uri.parse('https://manish-jewellers.com/api/v1/payments'));
     request.fields.addAll({
       'plan_amount': amount,
       'plan_code': planCode,

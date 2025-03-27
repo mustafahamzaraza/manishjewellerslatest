@@ -273,6 +273,7 @@ class SplashScreenState extends State<SplashScreen> {
                   Positioned(
                     top: size.height * 0.07, // Dynamic positioning
                     child: Image.asset(
+                      // 'assets/images/mjicon.jpg',
                       'assets/images/mjicon.jpg',
                       height: iconSize,
                       fit: BoxFit.contain,
@@ -323,7 +324,8 @@ class SplashScreenState extends State<SplashScreen> {
                     child: FittedBox(
                       fit: BoxFit.scaleDown, // Prevents text overflow
                       child: Text(
-                        "\tEmpowering\nYour\nGold\nInvestments",
+                        // "\tEmpowering\nYour\nGold\nInvestments",
+                        "Shop Smart,\n Shop Easy",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontWeight: FontWeight.bold,

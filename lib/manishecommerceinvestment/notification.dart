@@ -40,7 +40,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       'Authorization': 'Bearer $token'
     };
 
-    var url = Uri.parse('https://manish-jewellers.com/api/notifications');
+    var url = Uri.parse('https://manish-jewellers.com/api/v1/notifications');
 
     try {
       var response = await http.get(url, headers: headers);

@@ -39,7 +39,7 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
     var headers = {'Accept': 'application/json', 'Authorization': 'Bearer $token'};
     var request = http.MultipartRequest(
       'GET',
-      Uri.parse('https://manish-jewellers.com/api/installment-payment/list'),
+      Uri.parse('https://manish-jewellers.com/api/v1/installment-payment/list'),
     );
 
     request.headers.addAll(headers);
