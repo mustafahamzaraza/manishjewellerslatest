@@ -46,7 +46,7 @@ class _WebViewScreenTwoState extends State<WebViewScreenTwo> {
 
         onTitleChanged: (controller, url) async {
           // Handle redirection after payment
-          if (url.toString().contains("https://manish-jewellers.com/razorpay/callback")) {
+          if (url.toString().contains("https://manish-jewellers.com/callback")) {
 
             print("Payment Success URL reached!");
 
@@ -58,7 +58,7 @@ class _WebViewScreenTwoState extends State<WebViewScreenTwo> {
               ),
             );
           }
-          if (url.toString().contains("https://manish-jewellers.com/razorpay/callback")) {
+          if (url.toString().contains("https://manish-jewellers.com/callback")) {
             Navigator.pop(context); // Close the WebViewScreen
             Navigator.pushReplacement(
               context,
@@ -80,7 +80,7 @@ class _WebViewScreenTwoState extends State<WebViewScreenTwo> {
         //https://manish-jewellers.com/razorpay/callback
         onLoadStop: (controller, url) async {
           // Check if the current URL is the success URL
-          if (url.toString().contains("https://manish-jewellers.com/razorpay/callback")) {
+          if (url.toString().contains("https://manish-jewellers.com/callback")) {
             try {
               // Inject JavaScript to get the full page content (HTML body or JSON response)
               String? response = await controller.evaluateJavascript(
@@ -94,7 +94,7 @@ class _WebViewScreenTwoState extends State<WebViewScreenTwo> {
                 final parsedResponse = jsonDecode(response);
 
                 // Check if the message in the response is "Payment succeeded"
-                if (parsedResponse['message'] == 'https://manish-jewellers.com/razorpay/callback') {
+                if (parsedResponse['message'] == 'https://manish-jewellers.com/callback') {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => PaymentHistoryList()),

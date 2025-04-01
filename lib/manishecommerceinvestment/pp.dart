@@ -241,7 +241,10 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
   }
 
   void _updateGoldCalculation(String value) {
-    enteredAmount = double.tryParse(value)!;
+  //  enteredAmount = double.tryParse(value)!;
+
+    double enteredAmount = double.tryParse(value) ?? 0.0;
+
     if (enteredAmount != null) {
     //  double effectiveAmount;
 
@@ -416,22 +419,15 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
       if (response.statusCode == 200) {
         String responseBody = await response.stream.bytesToString();
         var jsonResponse = json.decode(responseBody);
+        String paymentUrl = jsonResponse['redirectUrl'];
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WebViewScreenTwo(redirectUrl: paymentUrl),
+          ),
+        );
 
-        if (jsonResponse['status'] == true) {
-          String paymentUrl = jsonResponse['message'];
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WebViewScreenTwo(redirectUrl: paymentUrl),
-            ),
-          );
-        } else {
 
-          print("API Error Response: $jsonResponse");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to generate payment URL")),
-          );
-        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: ${response.reasonPhrase}")),
@@ -948,29 +944,29 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                   ),
                   SizedBox(height: 16),
                   //  When Razorpay is selected, show the deducted total and new gold weight
-                  // if (selectedPaymentMethod == 'Razorpay') ...[
-                  //   StreamBuilder<double>(
-                  //     stream: _deductedAmountController.stream,
-                  //     initialData: 0.0,
-                  //     builder: (context, snapshot) {
-                  //       return Text(
-                  //         "Total: ${snapshot.data!.toStringAsFixed(2)}",
-                  //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
-                  //       );
-                  //     },
-                  //   ),
-                  //   SizedBox(height: 16),
-                  //   StreamBuilder<double>(
-                  //     stream: _goldWeightController.stream,
-                  //     initialData: 0.0,
-                  //     builder: (context, snapshot) {
-                  //       return Text(
-                  //         "Gold Acquired: ${snapshot.data!.toStringAsFixed(4)} grams",
-                  //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
-                  //      );
-                  //    },
-                  //  ),
-                  // ],
+                  if (selectedPaymentMethod == 'Razorpay') ...[
+                    StreamBuilder<double>(
+                      stream: _deductedAmountController.stream,
+                      initialData: 0.0,
+                      builder: (context, snapshot) {
+                        return Text(
+                          "Total: ${snapshot.data!.toStringAsFixed(2)}",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    StreamBuilder<double>(
+                      stream: _goldWeightController.stream,
+                      initialData: 0.0,
+                      builder: (context, snapshot) {
+                        return Text(
+                          "Gold Acquired: ${snapshot.data!.toStringAsFixed(4)} grams",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
+                       );
+                     },
+                   ),
+                  ],
                   SizedBox(height: 16),
                   // Payment Options
                   Wrap(
@@ -978,22 +974,22 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                     spacing: 10, // Items के बीच gap
                     runSpacing: 10, // Lines के बीच gap
                     children: [
-                      // Row(
-                      //   mainAxisSize: MainAxisSize.min,
-                      //   children: [
-                      //     Radio<String>(
-                      //       value: 'Razorpay',
-                      //       groupValue: selectedPaymentMethod,
-                      //       onChanged: (value) {
-                      //         setState(() {
-                      //           selectedPaymentMethod = value!;
-                      //           _updateGoldCalculation(_onlineController.text);
-                      //         });
-                      //       },
-                      //     ),
-                      //     Text("Razorpay"),
-                      //   ],
-                      // ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Radio<String>(
+                            value: 'Razorpay',
+                            groupValue: selectedPaymentMethod,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedPaymentMethod = value!;
+                                _updateGoldCalculation(_onlineController.text);
+                              });
+                            },
+                          ),
+                          Text("Online"),
+                        ],
+                      ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1058,21 +1054,21 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                           }
                         }
 
-                        // else if (selectedPaymentMethod == 'Razorpay') {
-                        //   String onlineAmount = _onlineController.text.trim();
-                        //   if (onlineAmount.isNotEmpty) {
-                        //    _startRazorpayPayment(context);
-                        //     // _processRazorpayPayment(context);
-                        //     // // ScaffoldMessenger.of(context).showSnackBar(
-                        //     // //   SnackBar(content: Text("Please")),
-                        //     // // );
-                        //     // // Call the API function
-                        //   } else {
-                        //     ScaffoldMessenger.of(context).showSnackBar(
-                        //       SnackBar(content: Text("Please enter a valid amount for online payment")),
-                        //     );
-                        //   }
-                        // }
+                        else if (selectedPaymentMethod == 'Razorpay') {
+                          String onlineAmount = _onlineController.text.trim();
+                          if (onlineAmount.isNotEmpty) {
+                           _startRazorpayPayment(context);
+                            // _processRazorpayPayment(context);
+                            // // ScaffoldMessenger.of(context).showSnackBar(
+                            // //   SnackBar(content: Text("Please")),
+                            // // );
+                            // // Call the API function
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Please enter a valid amount for online payment")),
+                            );
+                          }
+                        }
 
 
                       },

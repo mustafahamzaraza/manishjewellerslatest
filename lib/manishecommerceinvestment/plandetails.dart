@@ -36,7 +36,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
  double goldPricePerGram = 0.0; // Will be updated from API
  String currentDateTime = "";
 
-  String selectedPaymentMethod = 'Cash';
+  // String selectedPaymentMethod = 'Cash';
+ String selectedPaymentMethod = 'Razorpay';
 
 
   Future<void> fetchGoldPrices() async {
@@ -126,7 +127,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
    debugStreamValues(); // Debugging
 
-   selectedPaymentMethod = 'Cash';
+   selectedPaymentMethod = 'Razorpay';
 
  }
 
@@ -144,7 +145,10 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
 
  void _updateGoldCalculation(String value) {
-   enteredAmount = double.tryParse(value)!;
+   // enteredAmount = double.tryParse(value)!;
+
+   double enteredAmount = double.tryParse(value) ?? 0.0;
+
    if (enteredAmount != null) {
      // double effectiveAmount;
 
@@ -248,22 +252,15 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
      if (response.statusCode == 200) {
        String responseBody = await response.stream.bytesToString();
        var jsonResponse = json.decode(responseBody);
-
-       if (jsonResponse['status'] == true) {
-         String paymentUrl = jsonResponse['message'];
+       String paymentUrl = jsonResponse['redirectUrl'];
          Navigator.push(
            context,
            MaterialPageRoute(
              builder: (context) => WebViewScreenTwo(redirectUrl: paymentUrl),
            ),
          );
-       } else {
 
-         print("API Error Response: $jsonResponse");
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text("Failed to generate payment URL")),
-         );
-       }
+
      } else {
        ScaffoldMessenger.of(context).showSnackBar(
          SnackBar(content: Text("Error: ${response.reasonPhrase}")),
@@ -338,6 +335,32 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                      },
                    ),
                  SizedBox(height: 10),
+
+                 if (selectedPaymentMethod == 'Razorpay') ...[
+                   StreamBuilder<double>(
+                     stream: _deductedAmountController.stream,
+                     initialData: 0.0,
+                     builder: (context, snapshot) {
+                       return Text(
+                         "Total: ${snapshot.data!.toStringAsFixed(2)}",
+                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                       );
+                     },
+                   ),
+                   SizedBox(height: 16),
+                   StreamBuilder<double>(
+                     stream: _goldWeightController.stream,
+                     initialData: 0.0,
+                     builder: (context, snapshot) {
+                       return Text(
+                         "Gold Acquired: ${snapshot.data!.toStringAsFixed(4)} grams",
+                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
+                       );
+                     },
+                   ),
+                 ],
+
+
                //   // Amount TextField with dynamic hintText
                  TextField(
                    controller: selectedPaymentMethod == 'Razorpay' ? _onlineController : _offlineController,
@@ -359,31 +382,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                      _updateGoldCalculation(value);
                    },
                  ),
-               //   SizedBox(height: 16),
+                  SizedBox(height: 16),
                // //  When Razorpay is selected, show the deducted total and new gold weight
-               //   if (selectedPaymentMethod == 'Razorpay') ...[
-               //     StreamBuilder<double>(
-               //       stream: _deductedAmountController.stream,
-               //       initialData: 0.0,
-               //       builder: (context, snapshot) {
-               //         return Text(
-               //           "Total: ${snapshot.data!.toStringAsFixed(2)}",
-               //           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
-               //         );
-               //       },
-               //     ),
-               //     SizedBox(height: 16),
-               //     StreamBuilder<double>(
-               //       stream: _goldWeightController.stream,
-               //       initialData: 0.0,
-               //       builder: (context, snapshot) {
-               //         return Text(
-               //           "Gold Acquired: ${snapshot.data!.toStringAsFixed(4)} grams",
-               //           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
-               //         );
-               //       },
-               //     ),
-               //   ],
+
                  SizedBox(height: 16),
                  // Payment Options
                  Wrap(
@@ -391,22 +392,22 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                    spacing: 10, // Items के बीच gap
                    runSpacing: 10, // Lines के बीच gap
                    children: [
-                     // Row(
-                     //   mainAxisSize: MainAxisSize.min,
-                     //   children: [
-                     //     Radio<String>(
-                     //       value: 'Razorpay',
-                     //       groupValue: selectedPaymentMethod,
-                     //       onChanged: (value) {
-                     //         setState(() {
-                     //           selectedPaymentMethod = value!;
-                     //           _updateGoldCalculation(_onlineController.text);
-                     //         });
-                     //       },
-                     //     ),
-                     //     Text("Razorpay"),
-                     //   ],
-                     // ),
+                     Row(
+                       mainAxisSize: MainAxisSize.min,
+                       children: [
+                         Radio<String>(
+                           value: 'Razorpay',
+                           groupValue: selectedPaymentMethod,
+                           onChanged: (value) {
+                             setState(() {
+                               selectedPaymentMethod = value!;
+                               _updateGoldCalculation(_onlineController.text ?? '0');
+                             });
+                           },
+                         ),
+                         Text("Online"),
+                       ],
+                     ),
                      Row(
                        mainAxisSize: MainAxisSize.min,
                        children: [
@@ -422,32 +423,32 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                          Text("Cash"),
                        ],
                      ),
-                     Row(
-                       mainAxisSize: MainAxisSize.min,
-                       children: [
-                         Radio<String>(
-                           value: 'Auto',
-                           groupValue: selectedPaymentMethod,
-                           onChanged: (value) {
-                             setState(() {
-                               selectedPaymentMethod = value!;
-                             });
-                             showDialog(
-                               context: context,
-                               builder: (context) {
-                                 return DailySavingsDialog(
-                                   onSetupSavings: (double deductedAmount, double goldAcquiredtx) {
-                                     _processRazorpayPayment(context, deductedAmount, goldAcquiredtx);
-                                   },
-                                 );
-                               },
-                             );
-
-                           },
-                         ),
-                         Text("Automated Payment"),
-                       ],
-                     ),
+                     // Row(
+                     //   mainAxisSize: MainAxisSize.min,
+                     //   children: [
+                     //     Radio<String>(
+                     //       value: 'Auto',
+                     //       groupValue: selectedPaymentMethod,
+                     //       onChanged: (value) {
+                     //         setState(() {
+                     //           selectedPaymentMethod = value!;
+                     //         });
+                     //         showDialog(
+                     //           context: context,
+                     //           builder: (context) {
+                     //             return DailySavingsDialog(
+                     //               onSetupSavings: (double deductedAmount, double goldAcquiredtx) {
+                     //                 _processRazorpayPayment(context, deductedAmount, goldAcquiredtx);
+                     //               },
+                     //             );
+                     //           },
+                     //         );
+                     //
+                     //       },
+                     //     ),
+                     //     Text("Automated Payment"),
+                     //   ],
+                     // ),
                      // Row(
                      //   mainAxisSize: MainAxisSize.min,
                      //   children: [
@@ -500,25 +501,25 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                          }
                        }
 
-                       // else if (selectedPaymentMethod == 'Razorpay') {
-                       //   String onlineAmount = _onlineController.text.trim();
-                       //   if (onlineAmount.isNotEmpty) {
-                       //
-                       //     // _updateGoldCalculation(_offlineController.text);
-                       //     // Future.delayed(Duration(milliseconds: 300), () {
-                       //     //   _processRazorpayPayment(context);
-                       //     // });
-                       //
-                       //     _startRazorpayPayment(context);
-                       //     //_processRazorpayPayment(context);
-                       //     print('razorpay');
-                       //   } else {
-                       //     ScaffoldMessenger.of(context).showSnackBar(
-                       //       SnackBar(content: Text("Please enter a valid amount for online payment")),
-                       //     );
-                       //   }
-                       // }
-                       //
+                       else if (selectedPaymentMethod == 'Razorpay') {
+                         String onlineAmount = _onlineController.text.trim();
+                         if (onlineAmount.isNotEmpty) {
+
+                           // _updateGoldCalculation(_offlineController.text);
+                           // Future.delayed(Duration(milliseconds: 300), () {
+                           //   _processRazorpayPayment(context);
+                           // });
+
+                           _startRazorpayPayment(context);
+                           //_processRazorpayPayment(context);
+                           print('razorpay');
+                         } else {
+                           ScaffoldMessenger.of(context).showSnackBar(
+                             SnackBar(content: Text("Please enter a valid amount for online payment")),
+                           );
+                         }
+                       }
+
                        // else if (selectedPaymentMethod == 'Scan QR') {
                        //
                        //   // Navigator.push(
