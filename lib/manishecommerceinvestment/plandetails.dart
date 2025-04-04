@@ -1209,9 +1209,15 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           content: Text("Are you sure?"),
           actions: [
             TextButton(
-              child: Text("OK"),
+              child: Text("Yes"),
               onPressed: () {
                 startTransaction();
+                //Navigator.of(context).pop(); // Close dialog
+              },
+            ),
+            TextButton(
+              child: Text("No"),
+              onPressed: () {
                 Navigator.of(context).pop(); // Close dialog
               },
             ),
