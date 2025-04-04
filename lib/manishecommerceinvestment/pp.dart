@@ -7,14 +7,46 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
 import '../features/dashboard/screens/dashboard_screen.dart';
 import '../utill/colornew.dart';
 import 'drawer.dart';
 import 'gb.dart';
 import 'getloan.dart';
 import 'ledger.dart';
-
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/features/dashboard/screens/dashboard_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment/payment_status.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment_webview.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/pp.dart';
+import 'package:shared_preferences/shared_preferences.dart';// If you are using custom colors
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:uuid/uuid.dart';
+import 'dart:async';
+import '../features/gold/payment_webview.dart';
+import '../utill/colornew.dart';
+import 'gb.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/di_container.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment/upimer.dart';
+import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
+import 'package:uuid/uuid.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/features/dashboard/screens/dashboard_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment_webview.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/pp.dart';
+import 'package:shared_preferences/shared_preferences.dart';// If you are using custom colors
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class PaymentHistoryList extends StatefulWidget {
   const PaymentHistoryList({super.key});
@@ -24,6 +56,28 @@ class PaymentHistoryList extends StatefulWidget {
 }
 
 class _PaymentHistoryListState extends State<PaymentHistoryList> {
+
+
+  String request = "";
+  String appSchema = "";
+  List<String> environmentList = <String>['SANDBOX', 'PRODUCTION'];
+  bool enableLogs = true;
+  Object? result;
+
+  String environmentValue = 'PRODUCTION';
+  String merchantId = "M22J5SI2LQ62U";
+  //String environmentValue = 'SANDBOX';
+  //String merchantId = "MANISHJEWELUAT"; //testing
+
+
+  String flowId = ""; // Pass the user id or the unique string
+  String packageName = "com.phonepe.simulator";
+  String requestorderId = '';
+  String requestToken = '';
+  String requestMerchantOrderId = '';
+
+
+
   List<Map<String, dynamic>> paymentPlans = [];
   int _currentIndex = 0;
   TextEditingController _searchController = TextEditingController();
@@ -113,7 +167,142 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     _offlineController.addListener(_calculateGoldWeight);
      fetchProfileData(newAddress: '');
     fetchAdvertisements();
+    getFlowId();
+    initPhonePeSdk();
   }
+
+
+
+  void getFlowId(){
+    var uuid = Uuid();
+    flowId = uuid.v4();
+  }
+
+  void initPhonePeSdk() {
+
+    PhonePePaymentSdk.init(environmentValue, merchantId, flowId, enableLogs)
+        .then((isInitialized) => {
+      setState(() {
+        result = 'PhonePe SDK Initialized - $isInitialized';
+      })
+    })
+        .catchError((error) {
+      handleError(error);
+      return <dynamic>{};
+    });
+  }
+
+
+  void startTransaction() async {
+
+
+
+    try {
+
+      Map<String, dynamic> payload = {
+        "orderId": requestorderId,
+        "merchantId": merchantId,
+        "token": requestToken,
+        "paymentMode": {"type": "PAY_PAGE"}
+      };
+
+      String request = jsonEncode(payload);
+      print("Payment Request: $request");
+
+      PhonePePaymentSdk.startTransaction(request, appSchema)
+          .then((response) => {
+        setState(() {
+          if (response != null) {
+            String status = response['status'].toString();
+            String error = response['error'].toString();
+            if (status == 'SUCCESS') {
+              result = "Flow Completed - Status: Success!";
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentStatusPage(
+                    id: requestMerchantOrderId,
+                  ), // Replace with your widget
+                ),
+              );
+
+              print('passing id $requestMerchantOrderId');
+              //requestMerchantOrderId
+            } else {
+
+              result = "Flow Completed - Status: $status and Error: $error";
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentStatusPage(
+                    id: requestMerchantOrderId,
+                  ), // Replace with your widget
+                ),
+              );
+
+            }
+          }
+
+          else {
+            result = "Flow Incomplete";
+          }
+        })
+      })
+          .catchError((error) {
+        handleError(error);
+        return <dynamic>{};
+      });
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+
+  void getInstalledApps() {
+    if (Platform.isAndroid) {
+      getInstalledUpiAppsForAndroid();
+    } else {
+      print("Develop Code");
+    }
+  }
+
+  void getInstalledUpiAppsForAndroid() {
+    PhonePePaymentSdk.getUpiAppsForAndroid()
+        .then((apps) => {
+      setState(() {
+        if (apps != null) {
+          Iterable l = json.decode(apps);
+          List<UPIApp> upiApps = List<UPIApp>.from(
+              l.map((model) => UPIApp.fromJson(model)));
+          String appString = '';
+          for (var element in upiApps) {
+            appString +=
+            "${element.applicationName} ${element.version} ${element.packageName}";
+          }
+          result = 'Installed Upi Apps - $appString';
+        } else {
+          result = 'Installed Upi Apps - 0';
+        }
+      })
+    })
+        .catchError((error) {
+      handleError(error);
+      return <dynamic>{};
+    });
+  }
+
+  void handleError(error) {
+    setState(() {
+      if (error is Exception) {
+        result = error.toString();
+      } else {
+        result = {"error": error};
+      }
+    });
+  }
+
+
 
   Future<void> fetchAdvertisements() async {
     try {
@@ -277,7 +466,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     });
   }
 
-  void _startRazorpayPayment(BuildContext context) async {
+  Future<void> _startRazorpayPayment(BuildContext context) async {
 
     debugStreamValues();
     //
@@ -289,8 +478,13 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
     await Future.delayed(Duration(milliseconds: 500)); // Give streams time to update
 
-    print("⚡ Calling Razorpay payment function...");
-    _processRazorpayPayment(context,enteredAmount,goldAcquired);
+
+    String onlineAmountText = _onlineController.text.trim();
+    double? amount = double.tryParse(onlineAmountText);
+
+    _processRazorpayPayment(context,amount ?? 0.0,goldAcquired);
+
+    //_processRazorpayPayment(context,enteredAmount,goldAcquired);
   }
   // void _updateGoldCalculation(String value) {
   //   double? enteredAmount = double.tryParse(value);
@@ -384,6 +578,11 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     try {
 
 
+      var selectedPlan = paymentPlans[_currentIndex];
+      var planId = selectedPlan['id'];
+      var totalBalance = selectedPlan['total_balance'];
+      var start = selectedPlan['plan_start_date'];
+
       String? token = await getToken();
       var headers = {
         'Accept': 'application/json',
@@ -399,6 +598,8 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
         return DateFormat('yyyy-MM-dd').format(DateTime.now());
       }
 
+
+
       request.fields.addAll({
         'plan_amount': deductedAmount.toString(),
         'plan_code': planCode.toString(),
@@ -406,7 +607,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
         'total_yearly_payment': '0',
         'total_gold_purchase': goldAcquiredtx.toString(),
         'start_date': getCurrentDate(),
-        'installment_id': '0',
+        'installment_id': planId.toString(),
         'request_date': getCurrentDate(),
         'remarks': '',
         'no_of_months': GlobalPlan().months.toString()
@@ -417,15 +618,25 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
       http.StreamedResponse response = await request.send();
       if (response.statusCode == 200) {
+
         String responseBody = await response.stream.bytesToString();
         var jsonResponse = json.decode(responseBody);
-        String paymentUrl = jsonResponse['redirectUrl'];
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => WebViewScreenTwo(redirectUrl: paymentUrl),
-          ),
-        );
+        print('$jsonResponse');
+
+        requestorderId = jsonResponse['orderId'];
+        requestToken = jsonResponse['token'];
+        requestMerchantOrderId = jsonResponse['merchantOrderId'];
+        print('Order ID: $requestorderId');
+        print('Token: $requestToken');
+        // String responseBody = await response.stream.bytesToString();
+        // var jsonResponse = json.decode(responseBody);
+        // String paymentUrl = jsonResponse['redirectUrl'];
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => WebViewScreenTwo(redirectUrl: paymentUrl),
+        //   ),
+        // );
 
 
       } else {
@@ -1037,43 +1248,86 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed:  () {
-                        if (selectedPaymentMethod == 'Cash') {
-                          String offlineAmount = _offlineController.text.trim();
-                          double? amount = double.tryParse(offlineAmount);
-                          if (amount == null || amount < 100) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Amount must be greater than 100 for cash payments.")),
-                            );
-                            return;
-                          } else {
+          onPressed: () async {
+          print("method: $selectedPaymentMethod");
 
-                            payOffline(context, offlineAmount,planCode.toString(),planName.toString(), goldAcquired.toString()); // adjust as needed
+          if (selectedPaymentMethod == 'Cash') {
+          String offlineAmount = _offlineController.text.trim();
+          double? amount = double.tryParse(offlineAmount);
+
+          if (amount == null || amount < 100) {
+          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Amount must be greater than 100 for cash payments.")),
+          );
+          return;
+          } else {
+          await payOffline(
+          context,
+          offlineAmount,
+          planCode.toString(),
+          planName.toString(),
+          goldAcquired.toString(),
+          );
+
+          // await _showConfirmationDialog(context);
+          }
+          }
+
+          else if (selectedPaymentMethod == 'Razorpay') {
+          String onlineAmount = _onlineController.text.trim();
+
+          if (onlineAmount.isNotEmpty) {
+          await _startRazorpayPayment(context);
+
+          await Future.delayed(Duration(seconds: 3)); // ⏳ Wait 3 seconds
+          await _showConfirmationDialog(context);
 
 
-                          }
-                        }
+          } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Please enter a valid amount for online payment")),
+          );
+          }
+          }
+          }
 
-                        else if (selectedPaymentMethod == 'Razorpay') {
-                          String onlineAmount = _onlineController.text.trim();
-                          if (onlineAmount.isNotEmpty) {
-                           _startRazorpayPayment(context);
-                            // _processRazorpayPayment(context);
-                            // // ScaffoldMessenger.of(context).showSnackBar(
-                            // //   SnackBar(content: Text("Please")),
-                            // // );
-                            // // Call the API function
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Please enter a valid amount for online payment")),
-                            );
-                          }
-                        }
-
-
-                      },
+                      // onPressed:  () {
+                      //   if (selectedPaymentMethod == 'Cash') {
+                      //     String offlineAmount = _offlineController.text.trim();
+                      //     double? amount = double.tryParse(offlineAmount);
+                      //     if (amount == null || amount < 100) {
+                      //       ScaffoldMessenger.of(context).showSnackBar(
+                      //         SnackBar(content: Text("Amount must be greater than 100 for cash payments.")),
+                      //       );
+                      //       return;
+                      //     } else {
+                      //
+                      //       payOffline(context, offlineAmount,planCode.toString(),planName.toString(), goldAcquired.toString()); // adjust as needed
+                      //
+                      //
+                      //     }
+                      //   }
+                      //
+                      //   else if (selectedPaymentMethod == 'Razorpay') {
+                      //     String onlineAmount = _onlineController.text.trim();
+                      //     if (onlineAmount.isNotEmpty) {
+                      //      _startRazorpayPayment(context);
+                      //       // _processRazorpayPayment(context);
+                      //       // // ScaffoldMessenger.of(context).showSnackBar(
+                      //       // //   SnackBar(content: Text("Please")),
+                      //       // // );
+                      //       // // Call the API function
+                      //     } else {
+                      //       ScaffoldMessenger.of(context).showSnackBar(
+                      //         SnackBar(content: Text("Please enter a valid amount for online payment")),
+                      //       );
+                      //     }
+                      //   }
+                      //
+                      //
+                      // },
                       // Button is disabled if terms are not accepted
-                      child: Text(
+                      ,child: Text(
                         "Submit",
                         style: TextStyle(color: Colors.white),
                       ),
@@ -1202,127 +1456,6 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     }
   }
 
-
-
-
-
-
-  // Future<void> payOffline(BuildContext context, String amount,String pCode,String pName,String goldwt) async {
-  //   try {
-  //     String? token = await getToken();
-  //
-  //     String getCurrentDate() {
-  //       return DateFormat('yyyy-MM-dd').format(DateTime.now());
-  //     }
-  //
-  //     String formattedDate = getCurrentDate().toString();
-  //
-  //
-  //     if (formattedDate.isEmpty) {
-  //       formattedDate = getCurrentDate();
-  //     }
-  //
-  //     String formatDate(String dateString) {
-  //       try {
-  //         // Remove suffixes like "st", "nd", "rd", "th" to prevent parsing errors
-  //         String cleanDate = dateString.replaceAll(RegExp(r'(st|nd|rd|th)'), '');
-  //         DateTime parsedDate = DateFormat("MMMM d, yyyy hh:mm a").parse(cleanDate);
-  //         return DateFormat('yyyy-MM-dd').format(parsedDate);
-  //       } catch (e) {
-  //         print("Error parsing date: $e");
-  //         return ""; // Handle date parsing error
-  //       }
-  //     }
-  //
-  //     var selectedPlan = paymentPlans[_currentIndex];
-  //     var planId = selectedPlan['id'];
-  //     var totalBalance = selectedPlan['total_balance'];
-  //     var start = selectedPlan['plan_start_date'];
-  //
-  //     // Convert start date to required format
-  //     String? formattedStartDate = formatDate(start.toString());
-  //
-  //     // Debugging: Print values before sending request
-  //     print('Token: $token');
-  //     print('Plan ID: $planId');
-  //     print('Date before coversion $start');
-  //     print('Formatted Start Date: $formattedStartDate');
-  //
-  //     if (token != null) {
-  //       var headers = {
-  //         'Accept': 'application/json',
-  //         'Authorization': 'Bearer $token',
-  //       };
-  //
-  //       var request = http.MultipartRequest('POST', Uri.parse('https://manish-jewellers.com/api/payments'));
-  //
-  //       request.fields.addAll({
-  //         'plan_amount': amount,
-  //         'plan_code': pCode,
-  //         'plan_category': pName,
-  //         'total_yearly_payment': '0',
-  //         'total_gold_purchase': goldwt, // Changed '00' to '0' for safer formatting
-  //         'start_date': formattedStartDate ?? start.toString(),
-  //         'installment_id': planId.toString(),
-  //         'request_date': getCurrentDate(),
-  //         'remarks': '',
-  //         'no_of_months': ''
-  //       });
-  //
-  //       request.headers.addAll(headers);
-  //
-  //       // Debugging: Print request fields
-  //       print('Request Fields: ${jsonEncode(request.fields)}');
-  //
-  //       http.StreamedResponse response = await request.send();
-  //
-  //       if (response.statusCode == 201) {
-  //         String responseBody = await response.stream.bytesToString();
-  //         print('Payment Successful: $responseBody');
-  //
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(
-  //             content: Text(
-  //               "Payment Successful!",
-  //               style: TextStyle(color: Colors.white),
-  //             ),
-  //             backgroundColor: Colors.black,
-  //             duration: Duration(seconds: 2),
-  //           ),
-  //         );
-  //
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(builder: (context) => PaymentHistoryList()),
-  //         );
-  //       } else {
-  //
-  //
-  //
-  //         String errorResponse = await response.stream.bytesToString();
-  //         print('Error ${response.statusCode}: $errorResponse');
-  //
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(
-  //             content: Text("Payment failed! Error: ${response.statusCode}"),
-  //             backgroundColor: Colors.red,
-  //           ),
-  //         );
-  //       }
-  //     } else {
-  //       print('Error: Token not found. User might need to log in again.');
-  //     }
-  //   } catch (e) {
-  //     print('Exception: $e');
-  //
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text("An error occurred: $e"),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-  // }
 
 
 
@@ -1579,6 +1712,27 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Payment Confirmation"),
+          content: Text("Are you sure?"),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                startTransaction();
+                Navigator.of(context).pop(); // Close dialog
+              },
+            ),
+          ],
         );
       },
     );

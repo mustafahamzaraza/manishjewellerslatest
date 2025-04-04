@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/dashboard/screens/dashboard_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment/payment_status.dart';
 import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment_webview.dart';
 import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/pp.dart';
 import 'package:shared_preferences/shared_preferences.dart';// If you are using custom colors
@@ -53,18 +54,18 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
   List<String> environmentList = <String>['SANDBOX', 'PRODUCTION'];
   bool enableLogs = true;
   Object? result;
-  String environmentValue = 'SANDBOX';
-  String merchantId = "MANISHJEWELUAT"; //testing
+
+   String environmentValue = 'PRODUCTION';
+   String merchantId = "M22J5SI2LQ62U";
+   //String environmentValue = 'SANDBOX';
+   //String merchantId = "MANISHJEWELUAT"; //testing
+
+
   String flowId = ""; // Pass the user id or the unique string
   String packageName = "com.phonepe.simulator";
   String requestorderId = '';
   String requestToken = '';
-
-
-
-
-
-
+  String requestMerchantOrderId = '';
 
 
  String? planName;
@@ -228,11 +229,34 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             String error = response['error'].toString();
             if (status == 'SUCCESS') {
               result = "Flow Completed - Status: Success!";
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentStatusPage(
+                    id: requestMerchantOrderId,
+                  ), // Replace with your widget
+                ),
+              );
+
+              print('passing id $requestMerchantOrderId');
+              //requestMerchantOrderId
             } else {
-              result =
-              "Flow Completed - Status: $status and Error: $error";
+
+              result = "Flow Completed - Status: $status and Error: $error";
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentStatusPage(
+                    id: requestMerchantOrderId,
+                  ), // Replace with your widget
+                ),
+              );
+
             }
-          } else {
+          }
+
+          else {
             result = "Flow Incomplete";
           }
         })
@@ -426,7 +450,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
        requestorderId = jsonResponse['orderId'];
        requestToken = jsonResponse['token'];
-
+       requestMerchantOrderId = jsonResponse['merchantOrderId'];
        print('Order ID: $requestorderId');
        print('Token: $requestToken');
 
@@ -675,7 +699,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                              goldAcquired.toString(),
                            );
 
-                           await _showConfirmationDialog(context);
+                           // await _showConfirmationDialog(context);
                          }
                        }
 
@@ -698,59 +722,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                      }
 
 
-                     // onPressed:  () {
-                     //   print("method: ${selectedPaymentMethod}");
-                     //   if (selectedPaymentMethod == 'Cash') {
-                     //     String offlineAmount = _offlineController.text.trim();
-                     //     double? amount = double.tryParse(offlineAmount);
-                     //     if (amount == null || amount < 100) {
-                     //       ScaffoldMessenger.of(context).showSnackBar(
-                     //         SnackBar(content: Text("Amount must be greater than 100 for cash payments.")),
-                     //       );
-                     //       return;
-                     //     } else {
-                     //
-                     //       payOffline(context, offlineAmount,planCat.toString(),planName.toString(), goldAcquired.toString()); // adjust as needed
-                     //
-                     //
-                     //       print("yes");
-                     //
-                     //     }
-                     //   }
-                     //
-                     //   else if (selectedPaymentMethod == 'Razorpay') {
-                     //     String onlineAmount = _onlineController.text.trim();
-                     //     if (onlineAmount.isNotEmpty) {
-                     //
-                     //       // _updateGoldCalculation(_offlineController.text);
-                     //       // Future.delayed(Duration(milliseconds: 300), () {
-                     //       //   _processRazorpayPayment(context);
-                     //       // });
-                     //
-                     //       _startRazorpayPayment(context);
-                     //       //_processRazorpayPayment(context);
-                     //       print('razorpay');
-                     //     } else {
-                     //       ScaffoldMessenger.of(context).showSnackBar(
-                     //         SnackBar(content: Text("Please enter a valid amount for online payment")),
-                     //       );
-                     //     }
-                     //   }
-                     //
-                     //   // else if (selectedPaymentMethod == 'Scan QR') {
-                     //   //
-                     //   //   // Navigator.push(
-                     //   //   //   context,
-                     //   //   //   MaterialPageRoute(
-                     //   //   //     builder: (context) => PaymentScreen(),
-                     //   //   //   ),
-                     //   //   // );
-                     //   //
-                     //   // }
-                     //
-                     //
-                     // },
-                         // Button is disabled if terms are not accepted
+
 
 
 
