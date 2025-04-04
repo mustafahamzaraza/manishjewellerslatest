@@ -8,10 +8,30 @@ import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/pp.dart';
 import 'package:shared_preferences/shared_preferences.dart';// If you are using custom colors
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-
+import 'dart:convert';
+import 'package:uuid/uuid.dart';
+import 'dart:async';
 import '../features/gold/payment_webview.dart';
 import '../utill/colornew.dart';
 import 'gb.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/di_container.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment/upimer.dart';
+import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
+import 'package:uuid/uuid.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/features/dashboard/screens/dashboard_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment_webview.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/pp.dart';
+import 'package:shared_preferences/shared_preferences.dart';// If you are using custom colors
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
 
 
 
@@ -25,6 +45,27 @@ class PlanDetailScreen extends StatefulWidget {
 }
 
 class _PlanDetailScreenState extends State<PlanDetailScreen> {
+
+
+
+  String request = "";
+  String appSchema = "";
+  List<String> environmentList = <String>['SANDBOX', 'PRODUCTION'];
+  bool enableLogs = true;
+  Object? result;
+  String environmentValue = 'SANDBOX';
+  String merchantId = "MANISHJEWELUAT"; //testing
+  String flowId = ""; // Pass the user id or the unique string
+  String packageName = "com.phonepe.simulator";
+  String requestorderId = '';
+  String requestToken = '';
+
+
+
+
+
+
+
 
  String? planName;
  String? planCat;
@@ -51,8 +92,10 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
        print('response $data');
        setState(() {
+
          goldPricePerGram = double.tryParse(data['data']['price_gram']['22k_gst_included'].toString()) ?? 0.0;
          price22k = "${goldPricePerGram.toStringAsFixed(2)}";
+
          currentDateTime = dateTime;
        });
 
@@ -129,7 +172,129 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
    selectedPaymentMethod = 'Razorpay';
 
+
+
+
+   getFlowId();
+   initPhonePeSdk();
+
+
  }
+
+
+
+
+  void getFlowId(){
+    var uuid = Uuid();
+    flowId = uuid.v4();
+  }
+
+  void initPhonePeSdk() {
+
+    PhonePePaymentSdk.init(environmentValue, merchantId, flowId, enableLogs)
+        .then((isInitialized) => {
+      setState(() {
+        result = 'PhonePe SDK Initialized - $isInitialized';
+      })
+    })
+        .catchError((error) {
+      handleError(error);
+      return <dynamic>{};
+    });
+  }
+
+
+  void startTransaction() async {
+
+
+
+    try {
+
+      Map<String, dynamic> payload = {
+        "orderId": requestorderId,
+        "merchantId": merchantId,
+        "token": requestToken,
+        "paymentMode": {"type": "PAY_PAGE"}
+      };
+
+      String request = jsonEncode(payload);
+      print("Payment Request: $request");
+
+      PhonePePaymentSdk.startTransaction(request, appSchema)
+          .then((response) => {
+        setState(() {
+          if (response != null) {
+            String status = response['status'].toString();
+            String error = response['error'].toString();
+            if (status == 'SUCCESS') {
+              result = "Flow Completed - Status: Success!";
+            } else {
+              result =
+              "Flow Completed - Status: $status and Error: $error";
+            }
+          } else {
+            result = "Flow Incomplete";
+          }
+        })
+      })
+          .catchError((error) {
+        handleError(error);
+        return <dynamic>{};
+      });
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+
+  void getInstalledApps() {
+    if (Platform.isAndroid) {
+      getInstalledUpiAppsForAndroid();
+    } else {
+      print("Develop Code");
+    }
+  }
+
+  void getInstalledUpiAppsForAndroid() {
+    PhonePePaymentSdk.getUpiAppsForAndroid()
+        .then((apps) => {
+      setState(() {
+        if (apps != null) {
+          Iterable l = json.decode(apps);
+          List<UPIApp> upiApps = List<UPIApp>.from(
+              l.map((model) => UPIApp.fromJson(model)));
+          String appString = '';
+          for (var element in upiApps) {
+            appString +=
+            "${element.applicationName} ${element.version} ${element.packageName}";
+          }
+          result = 'Installed Upi Apps - $appString';
+        } else {
+          result = 'Installed Upi Apps - 0';
+        }
+      })
+    })
+        .catchError((error) {
+      handleError(error);
+      return <dynamic>{};
+    });
+  }
+
+  void handleError(error) {
+    setState(() {
+      if (error is Exception) {
+        result = error.toString();
+      } else {
+        result = {"error": error};
+      }
+    });
+  }
+
+
+
+
+
+
 
 
  void _calculateGoldWeight() {
@@ -183,7 +348,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
 
 
- void _startRazorpayPayment(BuildContext context) async {
+  Future<void> _startRazorpayPayment(BuildContext context) async {
 
    debugStreamValues();
 
@@ -194,7 +359,12 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
    await Future.delayed(Duration(milliseconds: 500)); // Give streams time to update
 
    print("⚡ Calling Razorpay payment function...");
-   _processRazorpayPayment(context,enteredAmount,goldAcquired);
+
+
+   String onlineAmountText = _onlineController.text.trim();
+   double? amount = double.tryParse(onlineAmountText);
+
+   _processRazorpayPayment(context,amount ?? 0.0,goldAcquired);
  }
 
 
@@ -211,11 +381,11 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
  bool _isProcessingPayment = false; // Add this flag
 
  Future<void> _processRazorpayPayment(BuildContext context,double deductedAmount,double goldAcquiredtx) async {
-   if (_isProcessingPayment) return; // Prevent multiple calls
-   _isProcessingPayment = true;
+
+  // if (_isProcessingPayment) return; // Prevent multiple calls
+  // _isProcessingPayment = true;
 
    try {
-
 
      String? token = await getToken();
      var headers = {
@@ -252,13 +422,13 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
      if (response.statusCode == 200) {
        String responseBody = await response.stream.bytesToString();
        var jsonResponse = json.decode(responseBody);
-       String paymentUrl = jsonResponse['redirectUrl'];
-         Navigator.push(
-           context,
-           MaterialPageRoute(
-             builder: (context) => WebViewScreenTwo(redirectUrl: paymentUrl),
-           ),
-         );
+       print('$jsonResponse');
+
+       requestorderId = jsonResponse['orderId'];
+       requestToken = jsonResponse['token'];
+
+       print('Order ID: $requestorderId');
+       print('Token: $requestToken');
 
 
      } else {
@@ -481,60 +651,111 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                          borderRadius: BorderRadius.circular(8),
                        ),
                      ),
-                     onPressed:  () {
-                       print("method: ${selectedPaymentMethod}");
+
+
+
+                     onPressed: () async {
+                       print("method: $selectedPaymentMethod");
+
                        if (selectedPaymentMethod == 'Cash') {
                          String offlineAmount = _offlineController.text.trim();
                          double? amount = double.tryParse(offlineAmount);
+
                          if (amount == null || amount < 100) {
                            ScaffoldMessenger.of(context).showSnackBar(
                              SnackBar(content: Text("Amount must be greater than 100 for cash payments.")),
                            );
                            return;
                          } else {
+                           await payOffline(
+                             context,
+                             offlineAmount,
+                             planCat.toString(),
+                             planName.toString(),
+                             goldAcquired.toString(),
+                           );
 
-                           payOffline(context, offlineAmount,planCat.toString(),planName.toString(), goldAcquired.toString()); // adjust as needed
-
-
-                           print("yes");
-
+                           await _showConfirmationDialog(context);
                          }
                        }
 
                        else if (selectedPaymentMethod == 'Razorpay') {
                          String onlineAmount = _onlineController.text.trim();
+
                          if (onlineAmount.isNotEmpty) {
+                           await _startRazorpayPayment(context);
 
-                           // _updateGoldCalculation(_offlineController.text);
-                           // Future.delayed(Duration(milliseconds: 300), () {
-                           //   _processRazorpayPayment(context);
-                           // });
+                            await Future.delayed(Duration(seconds: 3)); // ⏳ Wait 3 seconds
+                            await _showConfirmationDialog(context);
 
-                           _startRazorpayPayment(context);
-                           //_processRazorpayPayment(context);
-                           print('razorpay');
+
                          } else {
                            ScaffoldMessenger.of(context).showSnackBar(
                              SnackBar(content: Text("Please enter a valid amount for online payment")),
                            );
                          }
                        }
-
-                       // else if (selectedPaymentMethod == 'Scan QR') {
-                       //
-                       //   // Navigator.push(
-                       //   //   context,
-                       //   //   MaterialPageRoute(
-                       //   //     builder: (context) => PaymentScreen(),
-                       //   //   ),
-                       //   // );
-                       //
-                       // }
+                     }
 
 
-                     },
+                     // onPressed:  () {
+                     //   print("method: ${selectedPaymentMethod}");
+                     //   if (selectedPaymentMethod == 'Cash') {
+                     //     String offlineAmount = _offlineController.text.trim();
+                     //     double? amount = double.tryParse(offlineAmount);
+                     //     if (amount == null || amount < 100) {
+                     //       ScaffoldMessenger.of(context).showSnackBar(
+                     //         SnackBar(content: Text("Amount must be greater than 100 for cash payments.")),
+                     //       );
+                     //       return;
+                     //     } else {
+                     //
+                     //       payOffline(context, offlineAmount,planCat.toString(),planName.toString(), goldAcquired.toString()); // adjust as needed
+                     //
+                     //
+                     //       print("yes");
+                     //
+                     //     }
+                     //   }
+                     //
+                     //   else if (selectedPaymentMethod == 'Razorpay') {
+                     //     String onlineAmount = _onlineController.text.trim();
+                     //     if (onlineAmount.isNotEmpty) {
+                     //
+                     //       // _updateGoldCalculation(_offlineController.text);
+                     //       // Future.delayed(Duration(milliseconds: 300), () {
+                     //       //   _processRazorpayPayment(context);
+                     //       // });
+                     //
+                     //       _startRazorpayPayment(context);
+                     //       //_processRazorpayPayment(context);
+                     //       print('razorpay');
+                     //     } else {
+                     //       ScaffoldMessenger.of(context).showSnackBar(
+                     //         SnackBar(content: Text("Please enter a valid amount for online payment")),
+                     //       );
+                     //     }
+                     //   }
+                     //
+                     //   // else if (selectedPaymentMethod == 'Scan QR') {
+                     //   //
+                     //   //   // Navigator.push(
+                     //   //   //   context,
+                     //   //   //   MaterialPageRoute(
+                     //   //   //     builder: (context) => PaymentScreen(),
+                     //   //   //   ),
+                     //   //   // );
+                     //   //
+                     //   // }
+                     //
+                     //
+                     // },
                          // Button is disabled if terms are not accepted
-                     child: Text(
+
+
+
+
+         ,child: Text(
                        "Submit",
                        style: TextStyle(color: Colors.white),
                      ),
@@ -1005,6 +1226,31 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       ),
     );
   }
+
+
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Payment Confirmation"),
+          content: Text("Are you sure?"),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                startTransaction();
+                Navigator.of(context).pop(); // Close dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
 }
 
 

@@ -87,10 +87,15 @@ dependencies:
   drift_flutter: ^0.1.0
   webview_flutter:
   uni_links:
+  phonepe_payment_sdk:
+  #phonepe_payment_sdk: 2.0.2
+  #phonepe_payment_sdk: ^3.0.0
+
 
 
 dependency_overrides:
   intl: ^0.17.0
+  http: ^0.13.5
 
 dev_dependencies:
   flutter_lints: ^3.0.1

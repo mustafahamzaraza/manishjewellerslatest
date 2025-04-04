@@ -40,6 +40,7 @@ import 'package:flutter_sixvalley_ecommerce/features/splash/domain/models/config
 import 'package:flutter_sixvalley_ecommerce/helper/responsive_helper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
 import 'package:flutter_sixvalley_ecommerce/main.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment/phonepestepone.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
@@ -48,6 +49,7 @@ import 'package:provider/provider.dart';
 
 import '../../../manishecommerceinvestment/goldratescreen.dart';
 import '../../../manishecommerceinvestment/investmentPlans.dart';
+import '../../../manishecommerceinvestment/payment/phonepg.dart';
 import '../../../utill/colornew.dart';
 import '../../gold/goldpricescreen.dart';
 import '../../gold/goldpurchaseplanscreen.dart';
@@ -229,6 +231,13 @@ class _HomePageState extends State<HomePage> {
                         builder: (context) => GoldPriceScreenT(),
                       ),
                     );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //      builder: (context) => MerchantApp(),
+                    //   //  builder: (context) => PhonePePaymentScreen(),
+                    //   ),
+                    // );
                   },
                   child: Card(
                     elevation: 4,
