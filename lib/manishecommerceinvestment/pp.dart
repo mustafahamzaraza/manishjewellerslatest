@@ -165,8 +165,8 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
  //   GlobalPlan().setPlanDetails(widget.planId);
      fetchGoldPrices();
     _offlineController.addListener(_calculateGoldWeight);
-     fetchProfileData(newAddress: '');
-    fetchAdvertisements();
+  //   fetchProfileData(newAddress: '');
+  //  fetchAdvertisements();
     getFlowId();
     initPhonePeSdk();
   }
@@ -324,32 +324,32 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
   }
 
 
-  Widget _buildCarouselOffers() {
-    if (isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    if (advertisements.isEmpty) {
-      return Center(
-        child: Image.asset(
-          'assets/images/bh.jpg', // Default image when no ads are available
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
-    return CarouselSlider(
-      options: CarouselOptions(
-        enlargeCenterPage: true,
-        autoPlay: true,
-        aspectRatio: 21 / 11,
-        viewportFraction: 0.9,
-        autoPlayInterval: Duration(seconds: 3),
-        onPageChanged: (index, reason) => setState(() => _currentIndexoffer = index),
-      ),
-      items: advertisements.map((ad) => _buildCarouselItemOffer(ad)).toList(),
-    );
-  }
+  // Widget _buildCarouselOffers() {
+  //   if (isLoading) {
+  //     return Center(child: CircularProgressIndicator());
+  //   }
+  //
+  //   if (advertisements.isEmpty) {
+  //     return Center(
+  //       child: Image.asset(
+  //         'assets/images/bh.jpg', // Default image when no ads are available
+  //         fit: BoxFit.cover,
+  //       ),
+  //     );
+  //   }
+  //
+  //   return CarouselSlider(
+  //     options: CarouselOptions(
+  //       enlargeCenterPage: true,
+  //       autoPlay: true,
+  //       aspectRatio: 21 / 11,
+  //       viewportFraction: 0.9,
+  //       autoPlayInterval: Duration(seconds: 3),
+  //       onPageChanged: (index, reason) => setState(() => _currentIndexoffer = index),
+  //     ),
+  //     items: advertisements.map((ad) => _buildCarouselItemOffer(ad)).toList(),
+  //   );
+  // }
 
   Widget _buildCarouselItemOffer(Map<String, dynamic> ad) {
     return Card(
@@ -393,27 +393,6 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
       ),
     );
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -486,29 +465,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
     //_processRazorpayPayment(context,enteredAmount,goldAcquired);
   }
-  // void _updateGoldCalculation(String value) {
-  //   double? enteredAmount = double.tryParse(value);
-  //   if (enteredAmount != null) {
-  //     double effectiveAmount;
-  //     // If Razorpay, deduct 2%; if Cash (or any other method), use full amount.
-  //     if (selectedPaymentMethod == 'Razorpay') {
-  //       effectiveAmount = enteredAmount * 0.98;
-  //       // Update the deducted amount stream so that the UI shows the new total.
-  //       _deductedAmountController.add(effectiveAmount);
-  //     } else {
-  //       effectiveAmount = enteredAmount;
-  //       // You can also clear the deducted amount stream if needed:
-  //       _deductedAmountController.add(effectiveAmount);
-  //     }
-  //     // Clean the price string (remove any non-numeric characters) and parse it.
-  //     double goldPrice = double.parse(price22k.replaceAll(RegExp('[^0-9.]'), ''));
-  //     goldAcquired = effectiveAmount / goldPrice;
-  //     // Update the gold weight stream so that the UI shows the new gold weight.
-  //     _goldWeightController.add(goldAcquired);
-  //
-  //     print("Entered: $enteredAmount, Effective: $effectiveAmount, Gold Weight: $goldAcquired");
-  //   }
-  // }
+
 
 
   Future<void> fetchProfileData({required String newAddress}) async {
@@ -628,15 +585,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
         requestMerchantOrderId = jsonResponse['merchantOrderId'];
         print('Order ID: $requestorderId');
         print('Token: $requestToken');
-        // String responseBody = await response.stream.bytesToString();
-        // var jsonResponse = json.decode(responseBody);
-        // String paymentUrl = jsonResponse['redirectUrl'];
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => WebViewScreenTwo(redirectUrl: paymentUrl),
-        //   ),
-        // );
+
 
 
       } else {
@@ -656,83 +605,6 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
 
 
-  // Future<void> _processRazorpayPayment(BuildContext context) async {
-  //
-  //
-  //   double deductedAmount = await _deductedAmountController.stream.first;
-  //
-  //   double goldAcquiredtx = await _goldWeightController.stream.first;
-  //
-  //   String? token = await getToken();
-  //
-  //
-  //   var headers = {
-  //     'Accept': 'application/json',
-  //     'Authorization': 'Bearer $token'
-  //   };
-  //
-  //   var request = http.MultipartRequest(
-  //     'POST',
-  //     Uri.parse('https://manish-jewellers.com/api/online-payment'),
-  //   );
-  //
-  //   String getCurrentDate() {
-  //     return DateFormat('yyyy-MM-dd').format(DateTime.now());
-  //   }
-  //
-  //   request.fields.addAll({
-  //     'plan_amount': deductedAmount.toString(),
-  //     'plan_code': planCode.toString(),
-  //     'plan_category': planName.toString(),
-  //     'total_yearly_payment': '0',
-  //     'total_gold_purchase': goldAcquiredtx.toString(),
-  //     'start_date': getCurrentDate().toString(),
-  //     'installment_id': '0',
-  //     'request_date': getCurrentDate().toString(),
-  //     'remarks': '',
-  //     'no_of_months': GlobalPlan().months.toString()
-  //   });
-  //
-  //   print("API Request Fields: ${request.fields}");
-  //
-  //   request.headers.addAll(headers);
-  //
-  //   try {
-  //     http.StreamedResponse response = await request.send();
-  //     if (response.statusCode == 200) {
-  //       print('${response}');
-  //       String responseBody = await response.stream.bytesToString();
-  //       var jsonResponse = json.decode(responseBody);
-  //
-  //       if (jsonResponse['success'] == true) {
-  //         String paymentUrl = jsonResponse['payment_url'];
-  //
-  //         // Navigate to the new screen with payment URL
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => WebViewScreen(redirectUrl: paymentUrl),
-  //           ),
-  //         );
-  //       } else {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(content: Text("Failed to generate payment URL")),
-  //         );
-  //         print('${response} code ${response.statusCode}');
-  //       }
-  //     }
-  //     else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text("Error: ${response.reasonPhrase}")),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     print("Error: $e");
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text("Network error. Please try again.")),
-  //     );
-  //   }
-  // }
 
 
 
@@ -744,7 +616,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     var headers = {'Accept': 'application/json', 'Authorization': 'Bearer $token'};
     var request = http.MultipartRequest(
       'GET',
-      Uri.parse('https://manish-jewellers.com/api/installment-payment/v1/list'),
+      Uri.parse('https://manish-jewellers.com/api/v1/installment-payment/list'),
     );
 
     request.headers.addAll(headers);
@@ -768,7 +640,8 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
           print('Error decoding JSON: $jsonError');
         }
       } else {
-        print('Error: Received non-200 response status');
+        String responseBody = await response.stream.bytesToString();
+        print('Error: ${response.statusCode} $responseBody');
       }
     } catch (e) {
       print('Exception: $e');
@@ -789,15 +662,10 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-    //  drawer: CustomDrawer(),
       backgroundColor: AppColors.textDark,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        // leading: IconButton(
-        //   icon: Icon(Icons.menu,color: Colors.black,),
-        //   onPressed: () => _scaffoldKey.currentState?.openDrawer(), // ✅ Open drawer using key
-        // ),
       ),
       body: SafeArea(
         child: Padding(
@@ -809,7 +677,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                 _buildHeader(),
                 _buildCarousel(),
                 _buildIndicators(),
-                _buildCarouselOffers(),
+              //  _buildCarouselOffers(),
                 _buildQuickAccessRow(),
                 _buildSearchSection(),
                 _buildTransactionHeader(),
@@ -832,10 +700,10 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
         children: [
           InkWell(
             onTap: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => DashBoardScreen()),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => DashBoardScreen()),
+              // );
             },
             child: RichText(
               text: TextSpan(
@@ -906,7 +774,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
 
     planCode = plan['plan_code']; //INR
-   planName = plan['plan_category'];
+    planName = plan['plan_category'];
 
 
     return Card(
@@ -940,8 +808,8 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                 ],
               ),
               const SizedBox(height: 20),
-              _buildDetailRow(plan['plan_start_date'], '${plan['plan_code']} ${plan['id']} '),
-              _buildDetailRow(plan['plan_end_date'], 'Monthly ₹${plan['monthly_average'].toStringAsFixed(0)}'),
+              _buildDetailRow(plan['plan_start_date'] ?? '', '${plan['plan_code']} ${plan['id']} '),
+              _buildDetailRow(plan['plan_end_date'] ?? '', 'Monthly ₹${ plan['monthly_average'] ?? '0'}'),
             ],
           ),
         ),
@@ -1401,8 +1269,14 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
           'installment_id': planId.toString(),
           'request_date': getCurrentDate(),
           'remarks': '',
-          'no_of_months': ''
+          'no_of_months': GlobalPlan().months.toString()
         });
+
+
+
+
+
+
 
         request.headers.addAll(headers);
 
@@ -1431,6 +1305,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
             MaterialPageRoute(builder: (context) => PaymentHistoryList()),
           );
         } else {
+
           String errorResponse = await response.stream.bytesToString();
           print('Error ${response.statusCode}: $errorResponse');
 
@@ -1458,53 +1333,93 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
 
 
-
   List<Map<String, dynamic>> getFilteredTransactions() {
     String searchQuery = _searchController.text.trim();
     DateTime? dateFilter = selectedDate;
 
-    // Ensure that 'details' exists and is a List
     List<Map<String, dynamic>> transactions = [];
-    if (paymentPlans.isNotEmpty && paymentPlans[_currentIndex]['details'] != null) {
-      transactions = List<Map<String, dynamic>>.from(paymentPlans[_currentIndex]['details']);
+
+    // Flatten details
+    for (var plan in paymentPlans) {
+      if (plan['details'] != null) {
+        transactions.addAll(List<Map<String, dynamic>>.from(plan['details']));
+      }
     }
 
     // Filter by amount
     if (searchQuery.isNotEmpty) {
       transactions = transactions.where((payment) {
-        return payment['payment_amount'].toString().contains(searchQuery);
+        return payment['payment_amount']
+            .toString()
+            .contains(searchQuery);
       }).toList();
     }
 
-    // Filter by date if a date is selected
+    // Filter by selected date
     if (dateFilter != null) {
       transactions = transactions.where((payment) {
-        // Remove suffixes like "st", "nd", "rd", "th"
-        // In the getFilteredTransactions method:
-        String cleanedDateString = payment['payment_date'].replaceAllMapped(
-          RegExp(r'(\d+)(st|nd|rd|th)'),
-              (Match match) => match.group(1) ?? '',
-        );
-
         try {
-          // Parse the cleaned date string without time
-          DateTime paymentDate = DateFormat("MMMM dd, yyyy").parse(cleanedDateString);
+          // Assuming format is yyyy-MM-dd
+          DateTime paymentDate = DateTime.parse(payment['payment_date']);
 
-          // Compare the year, month, and day for both dates
           return paymentDate.year == dateFilter.year &&
               paymentDate.month == dateFilter.month &&
               paymentDate.day == dateFilter.day;
         } catch (e) {
-          // If there is an error in parsing the date, log the raw date and handle it
-          print("Error parsing date: $e. Raw date string: $cleanedDateString");
+          print("Date parse error: $e");
           return false;
         }
-
       }).toList();
     }
 
     return transactions;
   }
+  // List<Map<String, dynamic>> getFilteredTransactions() {
+  //   String searchQuery = _searchController.text.trim();
+  //   DateTime? dateFilter = selectedDate;
+  //
+  //   // Ensure that 'details' exists and is a List
+  //   List<Map<String, dynamic>> transactions = [];
+  //   if (paymentPlans.isNotEmpty && paymentPlans[_currentIndex]['details'] != null) {
+  //     transactions = List<Map<String, dynamic>>.from(paymentPlans[_currentIndex]['details']);
+  //   }
+  //
+  //   // Filter by amount
+  //   if (searchQuery.isNotEmpty) {
+  //     transactions = transactions.where((payment) {
+  //       return payment['payment_amount'].toString().contains(searchQuery);
+  //     }).toList();
+  //   }
+  //
+  //   // Filter by date if a date is selected
+  //   if (dateFilter != null) {
+  //     transactions = transactions.where((payment) {
+  //       // Remove suffixes like "st", "nd", "rd", "th"
+  //       // In the getFilteredTransactions method:
+  //       String cleanedDateString = payment['payment_date'].replaceAllMapped(
+  //         RegExp(r'(\d+)(st|nd|rd|th)'),
+  //             (Match match) => match.group(1) ?? '',
+  //       );
+  //
+  //       try {
+  //         // Parse the cleaned date string without time
+  //         DateTime paymentDate = DateFormat("MMMM dd, yyyy").parse(cleanedDateString);
+  //
+  //         // Compare the year, month, and day for both dates
+  //         return paymentDate.year == dateFilter.year &&
+  //             paymentDate.month == dateFilter.month &&
+  //             paymentDate.day == dateFilter.day;
+  //       } catch (e) {
+  //         // If there is an error in parsing the date, log the raw date and handle it
+  //         print("Error parsing date: $e. Raw date string: $cleanedDateString");
+  //         return false;
+  //       }
+  //
+  //     }).toList();
+  //   }
+  //
+  //   return transactions;
+  // }
 
 
   Widget _buildSearchSection() {

@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
 import '../utill/colornew.dart';
 
 class LedgerHistoryScreen extends StatefulWidget {
@@ -44,6 +43,7 @@ class _LedgerHistoryScreenState extends State<LedgerHistoryScreen> {
         String responseBody = await response.stream.bytesToString();
         try {
           var jsonData = jsonDecode(responseBody);
+          print('${jsonData.toString()}');
           if (jsonData is Map<String, dynamic> && jsonData.containsKey('data')) {
             setState(() {
               paymentPlans = List<Map<String, dynamic>>.from(jsonData['data']);
@@ -53,52 +53,48 @@ class _LedgerHistoryScreenState extends State<LedgerHistoryScreen> {
           print('Error decoding JSON: $jsonError');
         }
       } else {
-        print('Error: Received non-200 response status');
+        print('Error: ${response.statusCode}');
       }
     } catch (e) {
       print('Exception: $e');
     }
   }
 
+
   List<Map<String, dynamic>> getFilteredTransactions() {
     String searchQuery = _searchController.text.trim();
     DateTime? dateFilter = selectedDate;
 
     List<Map<String, dynamic>> transactions = [];
-    // Flatten paymentPlans list
-    paymentPlans.forEach((plan) {
+
+    // Flatten details
+    for (var plan in paymentPlans) {
       if (plan['details'] != null) {
         transactions.addAll(List<Map<String, dynamic>>.from(plan['details']));
       }
-    });
+    }
 
     // Filter by amount
     if (searchQuery.isNotEmpty) {
       transactions = transactions.where((payment) {
-        return payment['payment_amount'].toString().contains(searchQuery);
+        return payment['payment_amount']
+            .toString()
+            .contains(searchQuery);
       }).toList();
     }
 
-    // Filter by date if a date is selected
+    // Filter by selected date
     if (dateFilter != null) {
       transactions = transactions.where((payment) {
-        // Remove suffixes like "st", "nd", "rd", "th"
-        String cleanedDateString = payment['payment_date'].replaceAllMapped(
-          RegExp(r'(\d+)(st|nd|rd|th)'),
-              (Match match) => match.group(1) ?? '',
-        );
-
         try {
-          // Parse the cleaned date string without time
-          DateTime paymentDate = DateFormat("MMMM dd, yyyy").parse(cleanedDateString);
+          // Assuming format is yyyy-MM-dd
+          DateTime paymentDate = DateTime.parse(payment['payment_date']);
 
-          // Compare the year, month, and day for both dates
           return paymentDate.year == dateFilter.year &&
               paymentDate.month == dateFilter.month &&
               paymentDate.day == dateFilter.day;
         } catch (e) {
-          // If there is an error in parsing the date, log the raw date and handle it
-          print("Error parsing date: $e. Raw date string: $cleanedDateString");
+          print("Date parse error: $e");
           return false;
         }
       }).toList();
@@ -106,6 +102,54 @@ class _LedgerHistoryScreenState extends State<LedgerHistoryScreen> {
 
     return transactions;
   }
+
+
+  // List<Map<String, dynamic>> getFilteredTransactions() {
+  //   String searchQuery = _searchController.text.trim();
+  //   DateTime? dateFilter = selectedDate;
+  //
+  //   List<Map<String, dynamic>> transactions = [];
+  //   // Flatten paymentPlans list
+  //   paymentPlans.forEach((plan) {
+  //     if (plan['details'] != null) {
+  //       transactions.addAll(List<Map<String, dynamic>>.from(plan['details']));
+  //     }
+  //   });
+  //
+  //   // Filter by amount
+  //   if (searchQuery.isNotEmpty) {
+  //     transactions = transactions.where((payment) {
+  //       return payment['payment_amount'].toString().contains(searchQuery);
+  //     }).toList();
+  //   }
+  //
+  //   // Filter by date if a date is selected
+  //   if (dateFilter != null) {
+  //     transactions = transactions.where((payment) {
+  //       // Remove suffixes like "st", "nd", "rd", "th"
+  //       String cleanedDateString = payment['payment_date'].replaceAllMapped(
+  //         RegExp(r'(\d+)(st|nd|rd|th)'),
+  //             (Match match) => match.group(1) ?? '',
+  //       );
+  //
+  //       try {
+  //         // Parse the cleaned date string without time
+  //         DateTime paymentDate = DateFormat("MMMM dd, yyyy").parse(cleanedDateString);
+  //
+  //         // Compare the year, month, and day for both dates
+  //         return paymentDate.year == dateFilter.year &&
+  //             paymentDate.month == dateFilter.month &&
+  //             paymentDate.day == dateFilter.day;
+  //       } catch (e) {
+  //         // If there is an error in parsing the date, log the raw date and handle it
+  //         print("Error parsing date: $e. Raw date string: $cleanedDateString");
+  //         return false;
+  //       }
+  //     }).toList();
+  //   }
+  //
+  //   return transactions;
+  // }
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime initialDate = DateTime.now();

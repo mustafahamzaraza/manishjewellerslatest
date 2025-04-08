@@ -35,6 +35,7 @@ import 'package:flutter_sixvalley_ecommerce/features/refer_and_earn/screens/refe
 import 'package:flutter_sixvalley_ecommerce/features/setting/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../manishecommerceinvestment/goldratescreen.dart';
+import '../../../manishecommerceinvestment/ledger.dart';
 import '../../../utill/colornew.dart';
 import '../../gold/paymentlistscreen.dart';
 import 'faq_screen_view.dart';
@@ -136,7 +137,7 @@ class _MoreScreenState extends State<MoreScreen> {
                             navigateTo: PaymentHistoryList()),
 
                         MenuButtonWidget(image: Images.payWallet, title: 'Investment Ledger',
-                            navigateTo: PaymentListScreen()),
+                            navigateTo: LedgerHistoryScreen()),
 
 
                         MenuButtonWidget(image: Images.bgLatest, title: 'Credits List',

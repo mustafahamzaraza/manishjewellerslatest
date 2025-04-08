@@ -3,10 +3,15 @@
     package="com.banana.com"
     android:targetSandboxVersion="1" xmlns:tools="http://schemas.android.com/tools">
 
+
+
+
+
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -45,6 +50,12 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="Your_Map_Key_Here" />
+
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="default_channel"/>
+
 
         <activity
             android:name=".MainActivity"

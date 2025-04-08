@@ -17,6 +17,7 @@ import 'package:flutter_sixvalley_ecommerce/features/deal/controllers/flash_deal
 import 'package:flutter_sixvalley_ecommerce/features/location/controllers/location_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/loyaltyPoint/controllers/loyalty_point_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/notification/controllers/notification_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/notification/screens/notification_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/order/controllers/order_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/order_details/controllers/order_details_controller.dart';
@@ -64,9 +65,24 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final database = AppDatabase();
 
+
+
+
+// Background handler
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  _showNotification(message);
+}
+
+
+
+
+
 Future<void> main() async {
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
+
+
 
 
 
@@ -78,8 +94,19 @@ Future<void> main() async {
       messagingSenderId: "948376471552",
       appId: "1:948376471552:android:68bfca084be82ab535b0e5"
     ));
-  }else{
+
+
+    //new
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    await _initializeLocalNotifications();
+    //new
+
+
+  }
+  else{
+
     await Firebase.initializeApp();
+
   }
 }
   await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
@@ -149,9 +176,120 @@ Future<void> main() async {
   ));
 }
 
-class MyApp extends StatelessWidget {
+
+
+//new
+Future<void> _initializeLocalNotifications() async {
+  const AndroidInitializationSettings androidSettings =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const InitializationSettings initializationSettings =
+  InitializationSettings(android: androidSettings);
+
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse response) {
+      // Handle tap
+      print('🔔 Notification tapped: ${response.payload}');
+    },
+  );
+}
+
+void _showNotification(RemoteMessage message) async {
+  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    'default_channel',
+    'Default Notifications',
+    importance: Importance.max,
+    priority: Priority.high,
+    ticker: 'ticker',
+  );
+
+  const NotificationDetails platformDetails =
+  NotificationDetails(android: androidDetails);
+
+  await flutterLocalNotificationsPlugin.show(
+    message.hashCode,
+    message.notification?.title ?? 'New Alert',
+    message.notification?.body ?? '',
+    platformDetails,
+    payload: message.data['screen'], // optional navigation info
+  );
+}
+//new
+
+
+class MyApp extends StatefulWidget {
   final NotificationBody? body;
   const MyApp({super.key, required this.body});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+//new
+  @override
+  void initState() {
+    super.initState();
+    _requestPermission();
+    _getToken();
+    _listenToMessages();
+  }
+  void _requestPermission() async {
+    NotificationSettings settings =
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('✅ Notification permission granted');
+    } else {
+      print('❌ Notification permission denied');
+    }
+  }
+
+  void _getToken() async {
+    String? token = await FirebaseMessaging.instance.getToken();
+    print('📲 FCM Token: $token');
+    // TODO: Send token to your server
+  }
+
+  void _listenToMessages() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('📩 Foreground message received');
+      _showNotification(message);
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('📲 App opened via notification');
+      final screen = message.data['screen'];
+      if (screen != null) {
+        _navigateToScreen(screen);
+      }
+    });
+
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if (message != null) {
+        final screen = message.data['screen'];
+        if (screen != null) {
+          _navigateToScreen(screen);
+        }
+      }
+    });
+  }
+
+  void _navigateToScreen(String screen) {
+    // Navigate based on the screen name
+    print('🔀 Navigate to screen: $screen');
+    // Example: Navigator.pushNamed(context, '/$screen');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => NotificationScreen()),
+    );
+  }
+//new
 
 
   @override
@@ -182,7 +320,7 @@ class MyApp extends StatelessWidget {
             return MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling), child: child!);
           },
           supportedLocales: locals,
-          home: SplashScreen(body: body,),
+          home: SplashScreen(body: widget.body,),
         );
       }
     );
