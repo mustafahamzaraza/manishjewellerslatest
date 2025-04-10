@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/domain/models/register_model.dart';
@@ -29,6 +31,9 @@ import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakba
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
 
 class AuthController with ChangeNotifier {
   final AuthServiceInterface authServiceInterface;
@@ -167,6 +172,8 @@ class AuthController with ChangeNotifier {
   }
 
 
+
+
   Future registration(RegisterModel register, Function callback, ConfigModel config) async {
     _isLoading = true;
     notifyListeners();
@@ -186,10 +193,19 @@ class AuthController with ChangeNotifier {
 
 
       if(token != null && token.isNotEmpty){
+
+        final prefs = await SharedPreferences.getInstance();
+        // await prefs.setString('user_token', token);
+        await prefs.setString('auth_token', token);
+//
+
+
         authServiceInterface.saveUserToken(token);
         await authServiceInterface.updateDeviceToken();
         Navigator.pushAndRemoveUntil(Get.context!, MaterialPageRoute(builder: (_) => const DashBoardScreen()), (route) => false);
-      } else if (tempToken != null && tempToken.isNotEmpty) {
+      }
+
+      else if (tempToken != null && tempToken.isNotEmpty) {
         String type;
         if(config.customerVerification?.firebase == 1){
           type = 'phone';
@@ -248,6 +264,8 @@ class AuthController with ChangeNotifier {
       final ConfigModel config = Provider.of<SplashController>(Get.context!, listen: false).configModel!;
       clearGuestId();
       Map map = apiResponse.response!.data;
+      print("🟢 Full API Response: ${apiResponse.response!.data}");
+      log("🟢 Full API Response: ${apiResponse.response!.data}");
 
       String? temporaryToken = '', token = '', message = '', email, phone;
       bool isPhoneVerified = false;
@@ -305,7 +323,46 @@ class AuthController with ChangeNotifier {
 //
 
 
+        String? devicetoken;
 
+// Get current token immediately
+//         FirebaseMessaging.instance.getToken().then((tokenn) {
+//           print("📱 Signin FCM Token: $tokenn");
+//           devicetoken = token;
+//           sendNotificationToToken(devicetoken!);
+//         });
+
+        // FirebaseMessaging.instance.getToken().then((tokenn) async {
+        //   print("📱 Signin FCM Token: $tokenn");
+        //   devicetoken = tokenn;
+        //   await sendNotificationToToken(devicetoken!);
+        // });
+
+        // FirebaseMessaging.instance.getToken().then((tokenn) async {
+        //   print("📱 Signin FCM Token: $tokenn");
+        //   if (tokenn != null) {
+        //     await sendNotificationToToken(tokenn);
+        //   } else {
+        //     print("❗ Token was null");
+        //   }
+        // });
+
+// Listen for token refreshes
+//         FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+//           print("🔄 FCM Token refreshed: $newToken");
+//           devicetoken = newToken;
+//         });
+
+
+
+
+        // String? devicetoken;
+        // FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+        //   print("🔄 FCM Token refreshed: $newToken");
+        //   devicetoken = newToken;
+        //   // Send the updated token to server if user is still logged in
+        // });
+        // print('token new device $devicetoken');
         // Future<void> saveUserTokenApi(String token) async {
         //   final prefs = await SharedPreferences.getInstance();
         //   await prefs.setString('token', token);
@@ -1087,6 +1144,95 @@ class AuthController with ChangeNotifier {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     googleSignIn.disconnect();
   }
+
+
+
+  Future<void> sendNotificationToToken(String token) async {
+    print("🔔 sendNotificationToToken called with token: $token");
+
+    var url = Uri.parse('https://manish-jewellers.com/api/v1/send-notification-using-token');
+
+    var headers = {
+      'Content-Type': 'application/json'
+    };
+
+    var body = json.encode({
+      "device_token": token,
+      "title": "Manish Jewellers",
+      "body": "Welcome!"
+    });
+
+    try {
+      print("📤 Sending HTTP POST request...");
+      var response = await http.post(url, headers: headers, body: body);
+
+      print("📥 Got HTTP response...");
+
+      if (response.statusCode == 200) {
+        print("✅ Success: ${response.body}");
+      } else {
+        print("❌ Error ${response.statusCode}: ${response.reasonPhrase}");
+        print("Response body: ${response.body}");
+      }
+    } catch (e) {
+      print("❗ Exception sending notification: $e");
+    }
+  }
+
+
+  // Future<void> sendNotificationToToken(String token) async {
+  //   print("🔔 sendNotificationToToken called with token: $token");
+  //
+  //   var headers = {
+  //     'Content-Type': 'application/json'
+  //   };
+  //   var request = http.Request(
+  //       'POST',
+  //       Uri.parse('https://manish-jewellers.com/api/v1/send-notification-using-token')
+  //   );
+  //
+  //   request.body = json.encode({
+  //     "device_token": token,
+  //     "title": "Manish Jewellers",
+  //     "body": "This is for testing purpose"
+  //   });
+  //   request.headers.addAll(headers);
+  //
+  //   try {
+  //     http.StreamedResponse response = await request.send();
+  //
+  //     if (response.statusCode == 200) {
+  //       print(await response.stream.bytesToString());
+  //       print('✅ Sent FCM to backend: $response');
+  //     } else {
+  //       print("❌ ${response.reasonPhrase}");
+  //     }
+  //   } catch (e) {
+  //     print("❗ Exception sending notification: $e");
+  //   }
+  // }
+  // Future<void> sendNotificationToToken(String token) async {
+  //   var headers = {
+  //     'Content-Type': 'application/json'
+  //   };
+  //   var request = http.Request('POST', Uri.parse('https://manish-jewellers.com/api/v1/send-notification-using-token'));
+  //   request.body = json.encode({
+  //     "device_token": token,
+  //     "title": "Manish Jewellers",
+  //     "body": "This is for testing purpose"
+  //   });
+  //   request.headers.addAll(headers);
+  //
+  //   http.StreamedResponse response = await request.send();
+  //
+  //   if (response.statusCode == 200) {
+  //     print(await response.stream.bytesToString());
+  //     print('senttttt fcm to backend ${response.toString()}');
+  //   } else {
+  //     print(response.reasonPhrase);
+  //   }
+  // }
+
 
 }
 

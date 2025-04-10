@@ -6,12 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utill/colornew.dart';
 
 
-class NotificationScreen extends StatefulWidget {
+class NotificationScreenInvest extends StatefulWidget {
   @override
-  State<NotificationScreen> createState() => _NotificationScreenState();
+  State<NotificationScreenInvest> createState() => _NotificationScreenInvestState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
+class _NotificationScreenInvestState extends State<NotificationScreenInvest> {
   List<Map<String, String>> notifications = [];
   bool isLoading = true; // Loading state
 

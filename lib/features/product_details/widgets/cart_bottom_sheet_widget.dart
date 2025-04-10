@@ -143,15 +143,15 @@ class CartBottomSheetWidgetState extends State<CartBottomSheetWidget> {
 
               digitalVariantPrice = variantKey != null ? price : null;
 
-              // double priceWithDiscount = PriceConverter.convertWithDiscount(
-              //     context,
-              //     price,
-              //     widget.product!.discount,
-              //     widget.product!.discountType
-              // )!;
+              double priceWithDiscount = PriceConverter.convertWithDiscount(
+                  context,
+                  price,
+                  widget.product!.discount,
+                  widget.product!.discountType
+              )!;
 
 
-              //double priceWithQuantity = priceWithDiscount * details.quantity!;
+              double priceWithQuantity = priceWithDiscount * details.quantity!;
 
               double newpriceWithQuantity = pricwwithdiscount.toDouble() * details.quantity!;
 
@@ -458,14 +458,15 @@ class CartBottomSheetWidgetState extends State<CartBottomSheetWidget> {
                     //Total Priceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
                     //
 
-                    // CustomDirectionalityWidget(
-                    //   child: Text(PriceConverter.convertPrice(context, priceWithQuantity),
-                    //     style: titilliumBold.copyWith(color: ColorResources.getPrimary(context), fontSize: Dimensions.fontSizeLarge)),
-                    // ),
                     CustomDirectionalityWidget(
-                      child: Text("${newpriceWithQuantity}",
+                      child: Text(PriceConverter.convertPrice(context, priceWithQuantity),
                         style: titilliumBold.copyWith(color: ColorResources.getPrimary(context), fontSize: Dimensions.fontSizeLarge)),
                     ),
+
+                    // CustomDirectionalityWidget(
+                    //   child: Text("${newpriceWithQuantity}",
+                    //     style: titilliumBold.copyWith(color: ColorResources.getPrimary(context), fontSize: Dimensions.fontSizeLarge)),
+                    // ),
 
 
 

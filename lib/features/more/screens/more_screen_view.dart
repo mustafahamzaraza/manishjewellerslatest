@@ -34,8 +34,10 @@ import 'package:flutter_sixvalley_ecommerce/features/address/screens/address_lis
 import 'package:flutter_sixvalley_ecommerce/features/refer_and_earn/screens/refer_and_earn_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/setting/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
+import '../../../manishecommerceinvestment/completetransaction.dart';
 import '../../../manishecommerceinvestment/goldratescreen.dart';
 import '../../../manishecommerceinvestment/ledger.dart';
+import '../../../manishecommerceinvestment/notification.dart';
 import '../../../utill/colornew.dart';
 import '../../gold/paymentlistscreen.dart';
 import 'faq_screen_view.dart';
@@ -139,6 +141,8 @@ class _MoreScreenState extends State<MoreScreen> {
                         MenuButtonWidget(image: Images.payWallet, title: 'Investment Ledger',
                             navigateTo: LedgerHistoryScreen()),
 
+                        MenuButtonWidget(image: Images.payWallet, title: 'Transaction Details',
+                            navigateTo: TransactionDetailsPage()),
 
                         MenuButtonWidget(image: Images.bgLatest, title: 'Credits List',
                             navigateTo: LoanHistoryList()),
@@ -168,6 +172,11 @@ class _MoreScreenState extends State<MoreScreen> {
                         MenuButtonWidget(image: Images.notification, title: getTranslated('notification', context,),
                             isNotification: true,
                             navigateTo: const NotificationScreen()),
+
+
+                        MenuButtonWidget(image: Images.notification, title: 'Investment Notification',
+                            navigateTo: NotificationScreenInvest()),
+
 
                         MenuButtonWidget(image: Images.settings, title: getTranslated('settings', context),
                             navigateTo: const SettingsScreen())]))),

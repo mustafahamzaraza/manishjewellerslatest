@@ -232,10 +232,10 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
         children: [
           InkWell(
             onTap: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => DashBoardScreen()),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => DashBoardScreen()),
+              // );
             },
             child: RichText(
               text: const TextSpan(
@@ -253,10 +253,11 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
           const Spacer(),
           InkWell(
             onTap: (){
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => DashBoardScreen()),
-              );
+              Navigator.pop(context);
+              // Navigator.pushReplacement(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => DashBoardScreen()),
+              // );
             },
             child: const CircleAvatar(
               radius: 30,
@@ -293,7 +294,7 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
       options: CarouselOptions(
         enlargeCenterPage: true,
         autoPlay: false,
-        aspectRatio: 21 / 11,
+        aspectRatio: 21 / 12,
         viewportFraction: 0.9,
         onPageChanged: (index, reason) => setState(() => _currentIndex = index),
       ),
@@ -319,21 +320,37 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('₹${plan['total_balance']}',
+                      Text('₹${plan['remaining_withdrawn_amount']}',
                           style: const TextStyle(fontSize: 27, fontWeight: FontWeight.bold,height: 1)),
                       SizedBox(height: 5,),
                       Text('Balance', style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic,height: 1)),
+                      SizedBox(height: 10,),
+                      Row(
+                        children: [
+                          Text("Invested "),
+                          SizedBox(width: 3,),
+                          Text("${plan['total_balance']}",style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold,height: 1)),
+                        ],
+                      ) ,
+                      Row(
+                        children: [
+                          Text("Withdrawn"),
+                          SizedBox(width: 3,),
+                          Text("${plan['total_withdrawn_amount']}",style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold,height: 1)),
+                        ],
+                      ) ,
                       SizedBox(height: 5,),
                       Text('Gold Acquired ${plan['total_gold_purchase'].toString()} gm', style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic,fontWeight: FontWeight.w700,height: 1)),
                     ],
                   ),
                   Image.asset(
-                    'assets/images/check.png',  // Default image
+                    'assets/images/checknew.png',  // Default image
                     fit: BoxFit.cover,height: 60,width: 60,
                   ),
                 ],
               ),
-              const SizedBox(height: 25),
+              SizedBox(height: 5,),
+             // const SizedBox(height: 25),
               _buildDetailRow(plan['plan_start_date'], '${plan['plan_code']} ${plan['id']} '),
               _buildDetailRow(plan['plan_end_date'], 'Monthly ₹${plan['monthly_average'].toStringAsFixed(0)}'),
             ],
@@ -402,7 +419,7 @@ class _InvestmentPaymentDetailsState extends State<InvestmentPaymentDetails> {
   Widget _buildGraph() {
     List<_ChartData> chartData = _convertChartData();
 
-    print("Chart Data Length: \${chartData.length}"); // Debugging line
+    print("Chart Data Length: \$ ${chartData.length}"); // Debugging line
 
     if (chartData.isEmpty) {
       return Center(child: Text("No data available")); // Prevent chart from rendering with empty data

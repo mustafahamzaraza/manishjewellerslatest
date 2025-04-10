@@ -38,6 +38,7 @@ class _RemainingPlansScreenState extends State<RemainingPlansScreen> {
 
         if (responseData['status'] == true) {
           List<dynamic> plans = responseData['data']['plans'];
+          print('plans $plans');
 
           if (plans.isNotEmpty) {
             setState(() {

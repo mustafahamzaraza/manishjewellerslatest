@@ -23,6 +23,13 @@ import 'package:flutter_sixvalley_ecommerce/features/maintenance/maintenance_scr
 import 'package:flutter_sixvalley_ecommerce/features/notification/screens/notification_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/onboarding/screens/onboarding_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   final NotificationBody? body;
@@ -32,14 +39,15 @@ class SplashScreen extends StatefulWidget {
   SplashScreenState createState() => SplashScreenState();
 }
 
-class SplashScreenState extends State<SplashScreen> {
+class SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldMessengerState> _globalKey = GlobalKey();
   // late StreamSubscription<ConnectivityResult> _onConnectivityChanged;
 
   @override
   void initState() {
     super.initState();
-
+    WidgetsBinding.instance.addObserver(this);
+    getToken();
     // bool firstTime = true;
     // _onConnectivityChanged = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
     //   if(!firstTime) {
@@ -60,14 +68,79 @@ class SplashScreenState extends State<SplashScreen> {
     _initializeAsync();
   }
 
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async{
+    if (state == AppLifecycleState.resumed) {
+      // App is back from PhonePe
+      final prefs = await SharedPreferences.getInstance();
+      //  await prefs.getString('mandate');
+
+      final mandate = prefs.getString('mandate');
+
+      await Future.delayed(Duration(seconds: 3));
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Resumed on Splash Screen Init with mandate id $mandate')),
+      // );
+      checkMandateStatus(mandate.toString());
+    }
+  }
+
+
+  Future<String?> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_token'); // Returns the token or null if not found
+  }
+
+  Future<void> checkMandateStatus(String mandateId) async {
+    final url = Uri.parse(
+        'https://manish-jewellers.com/api/v1/phonepe/subscription/status/$mandateId');
+
+    try {
+      String? token = await getToken();
+      final response = await http.post(url, headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("Mandate Status Success: $data");
+
+       // ScaffoldMessenger.of(context).showSnackBar(
+        //  SnackBar(content: Text("✅ Payment Flow Completed with proper mandateid")),
+        //);
+      } else {
+        print("Mandate check failed: ${response.statusCode}");
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(
+        //         "❌ Payment process failed (${response.statusCode})"),
+        //     backgroundColor: Colors.red,
+        //     duration: Duration(seconds: 3),
+        //   ),
+        // );
+      }
+    } catch (e) {
+      print("Mandate check error: $e");
+    }
+  }
+
+
+
+
+
+
   Future<void> _initializeAsync() async {
-    await Future.delayed(const Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 3000));
     _route();
   }
 
   @override
   void dispose() {
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     // _onConnectivityChanged.cancel();
   }
 

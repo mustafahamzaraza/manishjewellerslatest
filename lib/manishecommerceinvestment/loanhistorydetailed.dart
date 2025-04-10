@@ -86,8 +86,9 @@ class _LoanHistoryDetailsListState extends State<LoanHistoryDetailsList> {
               _buildCarousel(),
               _buildIndicators(),
               _buildQuickAccessRow(),
-               SizedBox(height: 60,),
-              _buildProIndicators()
+               SizedBox(height: 15,),
+              //_buildProIndicators()
+              _buildCarouselnew()
             ],
           ),
         ),
@@ -200,7 +201,7 @@ class _LoanHistoryDetailsListState extends State<LoanHistoryDetailsList> {
                     ],
                   ),
                   Image.asset(
-                    'assets/images/check.png',  // Default image
+                    'assets/images/checknew.png',  // Default image
                     fit: BoxFit.cover,height: 60,width: 60,
                   ),
                 ],
@@ -359,52 +360,77 @@ class _LoanHistoryDetailsListState extends State<LoanHistoryDetailsList> {
       int monthEmi
       ) {
 
-    int emiPaid = totalEMI - remainingEMI;
+    // int emiPaid = totalEMI - remainingEMI;
 
+    int emiPaid = remainingEMI;
 
     return Align(
       alignment: Alignment.center,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10),
-        width: 300, // Adjusted width
-        height: 300, // Adjusted height
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              width: 270, // Control outer circle size
-              height: 270,
-              child: CircularProgressIndicator(
-                value: progress,
-                strokeWidth: 65, // Thicker progress stroke
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.glowingGold),
-              ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          double screenWidth = MediaQuery.of(context).size.width;
+          double availableWidth = constraints.hasBoundedWidth ? constraints.maxWidth : screenWidth;
+          double size = availableWidth * 0.5; // 70% of available width
+          double circleSize = size * 0.9;
+
+          return SizedBox(
+            width: size,
+            height: size,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-
-                Text(
-                  "Total EMI: $remainingamount", // Show EMI remaining and total
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                SizedBox(
+                  width: circleSize,
+                  height: circleSize,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: circleSize * 0.24, // proportional stroke
+                    backgroundColor: Colors.grey[300],
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.glowingGold),
+                  ),
                 ),
-                Text(
-                  "Current EMI $monthEmi", // Show EMI remaining and total
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+          //
+          // int emiRemaining = int.tryParse(plan['emi_remaining'].toString()) ?? 0;
+          // int totalEmi = int.tryParse(plan['total_no_of_emi'].toString()) ?? 1;
+          // double emiAmountRemaining = double.tryParse(plan['emi_amount_remaining'].toString()) ?? 0.0;
+          // double emiAmount = double.tryParse(plan['emi_amount'].toString()) ?? 0.0;
+                    Text(
+                      "Total EMI: $remainingamount",
+                      style: TextStyle(
+                        fontSize: size * 0.045,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      "Current EMI $monthEmi",
+                      style: TextStyle(
+                        fontSize: size * 0.045,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      "EMI Paid $emiPaid / $totalEMI",
+                      style: TextStyle(
+                        fontSize: size * 0.045,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 5),
+                  ],
                 ),
-                Text(
-                  "EMI Paid ${emiPaid} / $totalEMI", // Show EMI remaining and total
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 5),
-
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
+
   }
   Widget _buildProIndicators() {
     return Row(
@@ -424,49 +450,70 @@ class _LoanHistoryDetailsListState extends State<LoanHistoryDetailsList> {
   }
 
 
-// Widget _buildProIndicators() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.center,
-  //     children: List.generate(paymentPlans.length, (index) {
-  //       var plan = paymentPlans[index];
-  //       int totalEMI = plan['total_no_of_emi'] ?? 1; // Avoid division by zero
-  //       int remainingEMI = plan['emi_remaining'] ?? 0;
-  //       double progress = (totalEMI - remainingEMI) / totalEMI;
-  //
-  //       return _indicatorWithProgress(index, progress);
-  //     }),
-  //   );
-  // }
-  //
-  // Widget _indicatorWithProgress(int index, double progress) {
-  //   return Align(
-  //     alignment: Alignment.center,
-  //     child: Container(
-  //       margin: const EdgeInsets.symmetric(horizontal: 0),
-  //       width: 200, // Increased width
-  //       height: 200, // Increased height
-  //       child: Stack(
-  //         alignment: Alignment.center,
-  //         children: [
-  //           SizedBox(
-  //             width: 200, // Control outer circle size
-  //             height: 200,
-  //             child: CircularProgressIndicator(
-  //               value: progress,
-  //               strokeWidth: 30, // Thicker progress stroke
-  //               backgroundColor: Colors.grey[300],
-  //               valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-  //             ),
-  //           ),
-  //           Text(
-  //             "${(progress * 100).toStringAsFixed(0)}%", // Show percentage
-  //             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
+  Widget _buildCarouselnew() {
+    if (paymentPlans.isEmpty) {
+      return Center(
+        child: Image.asset(
+          'assets/images/bh.jpg',
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    return CarouselSlider(
+      options: CarouselOptions(
+        enlargeCenterPage: true,
+        autoPlay: false,
+        aspectRatio: 1.5,
+        viewportFraction: 1.1,
+        onPageChanged: (index, reason) => setState(() => _currentIndex = index),
+      ),
+      items: paymentPlans.asMap().entries.map((entry) {
+        int index = entry.key;
+        Map<String, dynamic> plan = entry.value;
+        return _buildCarouselItemnew(index, plan);
+      }).toList(),
+    );
+  }
+
+  Widget _buildCarouselItemnew(int index, Map<String, dynamic> plan) {
+
+    int emiRemaining = int.tryParse(plan['emi_paid'].toString()) ?? 0;
+
+    int totalEmi = double.tryParse(plan['total_no_of_emi'].toString())?.toInt() ?? 1;
+    // int totalEmi = int.tryParse(plan['total_no_of_emi'].toString()) ?? 0;
+    double emiAmountRemaining = double.tryParse(plan['emi_amount_remaining'].toString()) ?? 0.0;
+    double emiAmount = double.tryParse(plan['emi_amount'].toString()) ?? 0.0;
+
+    double progress = (emiRemaining / totalEmi).clamp(0.0, 1.0);
+
+    return Padding(
+      padding: const EdgeInsets.all(1.0),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: 10),
+            _indicatorWithProgress(
+              index,
+              progress,
+              emiRemaining,
+              totalEmi,
+              emiAmountRemaining.toInt(),
+              emiAmount.toInt(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+
+
+
+
 
 
 

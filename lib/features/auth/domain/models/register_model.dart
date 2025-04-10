@@ -7,8 +7,9 @@ class RegisterModel {
   String? socialId;
   String? loginMedium;
   String? referCode;
+  String? fcmToken;
 
-  RegisterModel({this.email, this.password, this.fName, this.lName, this.socialId,this.loginMedium, this.referCode});
+  RegisterModel({this.email, this.password, this.fName, this.lName, this.socialId,this.loginMedium, this.referCode,this.fcmToken});
 
   RegisterModel.fromJson(Map<String, dynamic> json) {
     email = json['email'];
@@ -19,6 +20,7 @@ class RegisterModel {
     socialId = json['social_id'];
     loginMedium = json['login_medium'];
     referCode = json['referral_code'];
+    fcmToken = json['cm_firebase_token'];
   }
 
   Map<String, dynamic> toJson() {
@@ -31,6 +33,7 @@ class RegisterModel {
     data['social_id'] = socialId;
     data['login_medium'] = loginMedium;
     data['referral_code'] = referCode;
+    data['cm_firebase_token'] = fcmToken;
     return data;
   }
 }

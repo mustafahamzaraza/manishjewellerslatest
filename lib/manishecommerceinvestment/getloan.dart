@@ -99,7 +99,7 @@ class _LoanScreenState extends State<LoanScreen> {
 
     double principal = _loanAmount.round().toDouble();
     int months = _months.round();
-    double annualInterestRate = 12; // example rate; replace with your actual rate
+    double annualInterestRate = 24; // example rate; replace with your actual rate
 
     emi = calculateEMI(principal, months, annualInterestRate);
 
@@ -674,7 +674,7 @@ Future<void> payOfflineLoan(BuildContext context, String amount, String months, 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "Successfully acquired a credits",
+              "Successfully acquired credits",
               style: TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.black,
@@ -690,7 +690,8 @@ Future<void> payOfflineLoan(BuildContext context, String amount, String months, 
             builder: (context) => LoanHistoryList(),
           ),
         );
-      } else {
+      }
+      else {
 
 
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment_webview.dart';
 import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/pd.dart';
+import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/plandetails.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -87,6 +88,9 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
   String? planName;
   String? planCode;
+
+
+  int? planpId;
 
   final TextEditingController _offlineController = TextEditingController();
   final TextEditingController _onlineController = TextEditingController();
@@ -540,6 +544,10 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
       var totalBalance = selectedPlan['total_balance'];
       var start = selectedPlan['plan_start_date'];
 
+
+      var planCo  = selectedPlan['plan_code'];
+      var planNam = selectedPlan['plan_category'];
+
       String? token = await getToken();
       var headers = {
         'Accept': 'application/json',
@@ -559,8 +567,8 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
       request.fields.addAll({
         'plan_amount': deductedAmount.toString(),
-        'plan_code': planCode.toString(),
-        'plan_category': planName.toString(),
+        'plan_code': planCo.toString(),
+        'plan_category': planNam.toString(),
         'total_yearly_payment': '0',
         'total_gold_purchase': goldAcquiredtx.toString(),
         'start_date': getCurrentDate(),
@@ -602,12 +610,6 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
       _isProcessingPayment = false; // Reset flag after execution
     }
   }
-
-
-
-
-
-
 
   Future<void> fetchPayments() async {
     String? token = await getToken();
@@ -663,10 +665,10 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppColors.textDark,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
+      // appBar: AppBar(
+      //   elevation: 0,
+      //   backgroundColor: Colors.transparent,
+      // ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
@@ -721,13 +723,14 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
           const Spacer(),
           InkWell(
             onTap: (){
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => DashBoardScreen()),
-              );
+              Navigator.pop(context);
+              // Navigator.pushReplacement(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => DashBoardScreen()),
+              // );
             },
             child: const CircleAvatar(
-              radius: 30,
+              radius: 25,
               backgroundColor: Colors.white,
               backgroundImage: AssetImage('assets/images/back.png'),
             ),
@@ -761,7 +764,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
       options: CarouselOptions(
         enlargeCenterPage: true,
         autoPlay: false,
-        aspectRatio: 21 / 11,
+        aspectRatio: 21 / 14,
         viewportFraction: 0.9,
         onPageChanged: (index, reason) => setState(() => _currentIndex = index),
       ),
@@ -777,65 +780,125 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     planName = plan['plan_category'];
 
 
+
+
+    var selectedPlan = paymentPlans[_currentIndex];
+    var planId = selectedPlan['id'];
+    planpId = selectedPlan['id'];
+  //  var planId = plan['id'];
+
     return Card(
       color: AppColors.glowingGold,
       margin: const EdgeInsets.symmetric(vertical: 15),
       child: Padding(
-        padding: const EdgeInsets.only(left: 25,right: 20,top: 20,bottom: 0),
+        padding: const EdgeInsets.only(left: 25,right: 20,top: 10,bottom: 0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          
+
+              SizedBox(height: 10),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('₹${plan['total_balance']}',
-                               style: const TextStyle(fontSize: 27, fontWeight: FontWeight.bold,height: 1)),
+                      Text('₹${plan['remaining_withdrawn_amount']}',
+                               style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold,height: 1)),
                       SizedBox(height: 5,),
-                      Text('Balance', style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic,height: 1)),
+
+                      Text('Balance', style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic,height: 1)),
+                      SizedBox(height: 10,),
+                      Row(
+                         children: [
+                           Text("Invested "),
+                           SizedBox(width: 3,),
+                           Text("${plan['total_balance']}",style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold,height: 1)),
+                         ],
+                       ) ,
+                         Row(
+                           children: [
+                             Text("Withdrawn"),
+                             SizedBox(width: 3,),
+                             Text("${plan['total_withdrawn_amount']}",style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold,height: 1)),
+                           ],
+                         ) ,
+
+
+
+
                       SizedBox(height: 5,),
                       Text('Gold Acquired ${plan['total_gold_purchase'].toString()} gm', style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic,fontWeight: FontWeight.w700,height: 1)),
                     ],
                   ),
                       Image.asset(
-                        'assets/images/check.png',  // Default image
+                        'assets/images/checknew.png',  // Default image
                         fit: BoxFit.cover,height: 60,width: 60,
                       ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 3),
+
+
               _buildDetailRow(plan['plan_start_date'] ?? '', '${plan['plan_code']} ${plan['id']} '),
               _buildDetailRow(plan['plan_end_date'] ?? '', 'Monthly ₹${ plan['monthly_average'] ?? '0'}'),
+               SizedBox(height: 15,),
+              InkWell(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return DailySavingsDialog(
+                        onSetupSavings: (amount, goldAcquired) {
+                          print("Daily amount: $amount");
+                          print("Gold Acquired: $goldAcquired grams");
+                        },
+                        planName: planName.toString(),
+                        planCat: planCode.toString(),
+                        goldAcquired: goldAcquired.toString(),
+                        installid: planpId ?? 0,
+                      );
+                    print('planName $planName planCode $planCode');
+                      print('id used in this transaction $planpId');
+                    },
+                  );
+                  print('id used in this transaction $planpId');
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                  decoration: BoxDecoration(
+                    color: AppColors.darkblue, // You can change this color
+                    borderRadius: BorderRadius.circular(10), // Curved edges
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.brown.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Start Saving",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+
             ],
           ),
         ),
       ),
     );
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1010,7 +1073,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       hintText: selectedPaymentMethod == 'Cash'
-                          ? "Add minimum amount 100"
+                          ? "Add minimum amount 500"
                           : selectedPaymentMethod == 'Razorpay'
                           ? "Enter amount (2% Tax applies)"
                           : "Enter amount",
@@ -1084,22 +1147,46 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                           Text("Cash"),
                         ],
                       ),
-                      // Row(
-                      //   mainAxisSize: MainAxisSize.min,
-                      //   children: [
-                      //     Radio<String>(
-                      //       value: 'Scan QR',
-                      //       groupValue: selectedPaymentMethod,
-                      //       onChanged: (value) {
-                      //         setState(() {
-                      //           selectedPaymentMethod = value!;
-                      //         });
-                      //         _showQRDialog(context);
-                      //       },
-                      //     ),
-                      //     Text("Scan QR"),
-                      //   ],
-                      // ),
+
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Radio<String>(
+                            value: 'AutoPay',
+                            groupValue: selectedPaymentMethod,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedPaymentMethod = value!;
+                              });
+                              // _showQRDialog(context);
+
+                              if (value == 'AutoPay') {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return DailySavingsDialog(
+                                      onSetupSavings: (amount, goldAcquired) {
+
+                                        print("Daily amount: $amount");
+                                        print("Gold Acquired: $goldAcquired grams");
+
+                                      },
+                                      planName: planName.toString(),
+                                      planCat: planCode.toString(),
+                                      goldAcquired: goldAcquired.toString(),
+                                      installid: planpId ?? 0,
+                                    );
+                                  },
+                                );
+                                print('id used in this transaction $planpId');
+
+                              }
+                            },
+                          ),
+                          Text("AutoPay"),
+                        ],
+                      ),
+
                     ],
                   ),
                   SizedBox(height: 16),
@@ -1116,85 +1203,64 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-          onPressed: () async {
-          print("method: $selectedPaymentMethod");
 
-          if (selectedPaymentMethod == 'Cash') {
-          String offlineAmount = _offlineController.text.trim();
-          double? amount = double.tryParse(offlineAmount);
+                      onPressed: () async {
+                        print("method: $selectedPaymentMethod");
 
-          if (amount == null || amount < 100) {
-          ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Amount must be greater than 100 for cash payments.")),
-          );
-          return;
-          } else {
-          await payOffline(
-          context,
-          offlineAmount,
-          planCode.toString(),
-          planName.toString(),
-          goldAcquired.toString(),
-          );
+                        if (selectedPaymentMethod == 'Cash') {
+                          String offlineAmount = _offlineController.text.trim();
+                          double? amount = double.tryParse(offlineAmount);
 
-          // await _showConfirmationDialog(context);
-          }
-          }
+                          if (amount == null || amount < 500) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Amount must be greater than 500 for cash payments.")),
+                            );
+                            return;
+                          } else {
+                            await payOffline(context,
+                              offlineAmount,
+                              goldAcquired.toString(),
+                            );
+                          }
+                        }
 
-          else if (selectedPaymentMethod == 'Razorpay') {
-          String onlineAmount = _onlineController.text.trim();
+                        else if (selectedPaymentMethod == 'Razorpay') {
+                          String onlineAmount = _onlineController.text.trim();
 
-          if (onlineAmount.isNotEmpty) {
-          await _startRazorpayPayment(context);
+                          if (onlineAmount.isNotEmpty) {
+                            await _startRazorpayPayment(
+                                context
 
-          await Future.delayed(Duration(seconds: 3)); // ⏳ Wait 3 seconds
-          await _showConfirmationDialog(context);
+                            );
+
+                            // Show loading dialog
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false, // Prevent closing by tap outside
+                              builder: (context) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              },
+                            );
+
+                            await Future.delayed(Duration(seconds: 3)); // Wait 3 seconds
+
+                            // Close loading dialog
+                            Navigator.of(context).pop();
+
+                            // Show confirmation dialog
+                            await _showConfirmationDialog(context);
+
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Please enter a valid amount for online payment")),
+                            );
+                          }
+                        }
+                      }
 
 
-          } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Please enter a valid amount for online payment")),
-          );
-          }
-          }
-          }
-
-                      // onPressed:  () {
-                      //   if (selectedPaymentMethod == 'Cash') {
-                      //     String offlineAmount = _offlineController.text.trim();
-                      //     double? amount = double.tryParse(offlineAmount);
-                      //     if (amount == null || amount < 100) {
-                      //       ScaffoldMessenger.of(context).showSnackBar(
-                      //         SnackBar(content: Text("Amount must be greater than 100 for cash payments.")),
-                      //       );
-                      //       return;
-                      //     } else {
-                      //
-                      //       payOffline(context, offlineAmount,planCode.toString(),planName.toString(), goldAcquired.toString()); // adjust as needed
-                      //
-                      //
-                      //     }
-                      //   }
-                      //
-                      //   else if (selectedPaymentMethod == 'Razorpay') {
-                      //     String onlineAmount = _onlineController.text.trim();
-                      //     if (onlineAmount.isNotEmpty) {
-                      //      _startRazorpayPayment(context);
-                      //       // _processRazorpayPayment(context);
-                      //       // // ScaffoldMessenger.of(context).showSnackBar(
-                      //       // //   SnackBar(content: Text("Please")),
-                      //       // // );
-                      //       // // Call the API function
-                      //     } else {
-                      //       ScaffoldMessenger.of(context).showSnackBar(
-                      //         SnackBar(content: Text("Please enter a valid amount for online payment")),
-                      //       );
-                      //     }
-                      //   }
-                      //
-                      //
-                      // },
-                      // Button is disabled if terms are not accepted
                       ,child: Text(
                         "Submit",
                         style: TextStyle(color: Colors.white),
@@ -1211,7 +1277,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
   }
 
 
-  Future<void> payOffline(BuildContext context, String amount, String pCode, String pName, String goldwt) async {
+  Future<void> payOffline(BuildContext context, String amount, String goldwt) async {
     try {
       String? token = await getToken();
 
@@ -1242,6 +1308,15 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
       var totalBalance = selectedPlan['total_balance'];
       var start = selectedPlan['plan_start_date'];
 
+      var pCode = selectedPlan['plan_code'];
+      var pName = selectedPlan['plan_category'];
+
+
+    //    planCode.toString(),
+  //  planName.toString(),
+ //     'plan_code': pCode,
+ //    'plan_category': pName,
+
       // Convert start date to required format
       String formattedStartDate = formatDate(start.toString());
 
@@ -1257,7 +1332,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
           'Authorization': 'Bearer $token',
         };
 
-        var request = http.MultipartRequest('POST', Uri.parse('https://manish-jewellers.com/api/v1/payments'));
+         var request = http.MultipartRequest('POST', Uri.parse('https://manish-jewellers.com/api/v1/payments'));
 
         request.fields.addAll({
           'plan_amount': amount,
@@ -1374,52 +1449,6 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
     return transactions;
   }
-  // List<Map<String, dynamic>> getFilteredTransactions() {
-  //   String searchQuery = _searchController.text.trim();
-  //   DateTime? dateFilter = selectedDate;
-  //
-  //   // Ensure that 'details' exists and is a List
-  //   List<Map<String, dynamic>> transactions = [];
-  //   if (paymentPlans.isNotEmpty && paymentPlans[_currentIndex]['details'] != null) {
-  //     transactions = List<Map<String, dynamic>>.from(paymentPlans[_currentIndex]['details']);
-  //   }
-  //
-  //   // Filter by amount
-  //   if (searchQuery.isNotEmpty) {
-  //     transactions = transactions.where((payment) {
-  //       return payment['payment_amount'].toString().contains(searchQuery);
-  //     }).toList();
-  //   }
-  //
-  //   // Filter by date if a date is selected
-  //   if (dateFilter != null) {
-  //     transactions = transactions.where((payment) {
-  //       // Remove suffixes like "st", "nd", "rd", "th"
-  //       // In the getFilteredTransactions method:
-  //       String cleanedDateString = payment['payment_date'].replaceAllMapped(
-  //         RegExp(r'(\d+)(st|nd|rd|th)'),
-  //             (Match match) => match.group(1) ?? '',
-  //       );
-  //
-  //       try {
-  //         // Parse the cleaned date string without time
-  //         DateTime paymentDate = DateFormat("MMMM dd, yyyy").parse(cleanedDateString);
-  //
-  //         // Compare the year, month, and day for both dates
-  //         return paymentDate.year == dateFilter.year &&
-  //             paymentDate.month == dateFilter.month &&
-  //             paymentDate.day == dateFilter.day;
-  //       } catch (e) {
-  //         // If there is an error in parsing the date, log the raw date and handle it
-  //         print("Error parsing date: $e. Raw date string: $cleanedDateString");
-  //         return false;
-  //       }
-  //
-  //     }).toList();
-  //   }
-  //
-  //   return transactions;
-  // }
 
 
   Widget _buildSearchSection() {
@@ -1501,7 +1530,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
             leading: CircleAvatar(
               radius: 37,
               backgroundColor: Colors.white,
-                  backgroundImage: AssetImage('assets/images/umbrella.png'),
+                  backgroundImage: AssetImage('assets/images/handshake.png'),
               // Local asset image
                  ),
               title: Text(

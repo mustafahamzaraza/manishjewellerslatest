@@ -60,12 +60,12 @@ class ProfileInfoSectionWidget extends StatelessWidget {
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.center, children: [
                     Text(!isGuestMode?
                     '${profile.userInfoModel?.fName??''} ${profile.userInfoModel?.lName??''}' : 'Guest',
-                        style: textMedium.copyWith(color: ColorResources.white, fontSize: Dimensions.fontSizeExtraLarge)),
+                        style: textMedium.copyWith(color: Colors.black, fontSize: Dimensions.fontSizeExtraLarge)),
 
                     if(!isGuestMode && profile.userInfoModel?.phone != null && profile.userInfoModel!.phone!.isNotEmpty)
                     const SizedBox(height: Dimensions.paddingSizeSmall),
                     if(!isGuestMode)
-                    Text(profile.userInfoModel?.phone??'', style: textRegular.copyWith(color: ColorResources.white, fontSize: Dimensions.fontSizeLarge)),
+                    Text(profile.userInfoModel?.phone??'', style: textRegular.copyWith(color: Colors.black, fontSize: Dimensions.fontSizeLarge)),
                   ],)),
 
                   InkWell(onTap: ()=> Provider.of<ThemeController>(context, listen: false).toggleTheme(),

@@ -236,7 +236,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
 
-                    //showing price
+                   // showing price
                     ProductTitleWidget(
                         productModel: details.productDetailsModel,
                         averageRatting: details.productDetailsModel?.averageReview?? "0"

@@ -54,7 +54,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
       print('Response status code: ${response.statusCode}');
       if (response.statusCode == 200) {
         String responseBody = await response.stream.bytesToString();
-        print('Response Body: $responseBody');
+        print('loan/list Response Body: $responseBody');
         try {
           var jsonData = jsonDecode(responseBody);
           debugPrint('Decoded Full JSON data: $jsonData');
@@ -243,7 +243,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
                     ],
                   ),
                   Image.asset(
-                    'assets/images/check.png',  // Default image
+                    'assets/images/checknew.png',  // Default image
                     fit: BoxFit.cover,height: 60,width: 60,
                   ),
                 ],
@@ -305,7 +305,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
           }),
 
           // Loan Button: Navigate to Loan Screen (or implement loan action)
-          _rowContainer('AuCred', 'assets/images/c.png', () {
+          _rowContainer('AuCred', 'assets/images/dc.png', () {
             var selectedPlan = paymentPlans[_currentIndex];
             var planId = selectedPlan['id'];
             print('idddddddd $planId');
@@ -382,7 +382,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
 
   Widget _paymentConfirmationDialog(BuildContext context) {
 
-    String selectedPaymentMethod = 'Razorpay';
+    String selectedPaymentMethod = 'Cash';
 
 
 
@@ -395,9 +395,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
         selectedPlan['emi_amount_remaining'].toString()
     ) ?? 0.0;
 
-    double emiAmount = double.tryParse(
-        selectedPlan['emi_amount'].toStringAsFixed(2)
-    ) ?? 0.0;
+    double emiAmount = double.tryParse(selectedPlan['emi_amount'].toStringAsFixed(0)) ?? 0.0;
 
 
     String formattedEmiAmount = emiAmount.toStringAsFixed(2);
@@ -484,20 +482,20 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
                 Row(
                   children: [
                     // Razorpay option
-                    Row(
-                      children: [
-                        Radio<String>(
-                          value: 'Razorpay',
-                          groupValue: selectedPaymentMethod,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedPaymentMethod = value!;
-                            });
-                          },
-                        ),
-                        Text("Razorpay"),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     Radio<String>(
+                    //       value: 'Razorpay',
+                    //       groupValue: selectedPaymentMethod,
+                    //       onChanged: (value) {
+                    //         setState(() {
+                    //           selectedPaymentMethod = value!;
+                    //         });
+                    //       },
+                    //     ),
+                    //     Text("Razorpay"),
+                    //   ],
+                    // ),
                     SizedBox(width: 16),
                     // Cash option
                     Row(
@@ -532,7 +530,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
                       // Get the selected plan from your paymentPlans list.
                       var selectedPlan = paymentPlans[_currentIndex];
                       // Retrieve the remaining EMI amount and ensure it's parsed as a number.
-                      double emiAmountRemaining = double.tryParse(selectedPlan['emi_amount'].toStringAsFixed(2)) ?? 0.0;
+                      double emiAmountRemaining = double.tryParse(selectedPlan['emi_amount'].toStringAsFixed(0)) ?? 0.0;
 
                       if (selectedPaymentMethod == 'Cash') {
                         String offlineAmount = _offlineController.text.trim();
@@ -554,71 +552,29 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
                         }
                       }
 
-                      // if (selectedPaymentMethod == 'Cash') {
-                      //   String offlineAmount = _offlineController.text.trim();
-                      //   if (offlineAmount.isNotEmpty) {
-                      //     double offlineValue = double.tryParse(offlineAmount) ?? 0.0;
-                      //     if (offlineValue <= emiAmountRemaining) {
-                      //       payOfflineLoan(context, offlineAmount);
-                      //     }
-                      //     else {
-                      //       print("Entered amount exceeds the remaining EMI amount: $emiAmountRemaining");
-                      //       ScaffoldMessenger.of(context).showSnackBar(
-                      //         SnackBar(
-                      //           content: Text("Entered amount must be less or equal to $emiAmountRemaining"),
-                      //           backgroundColor: Colors.red,
-                      //         ),
-                      //       );
-                      //     }
-                      //   } else {
-                      //     print("Please enter a valid amount for offline payment");
-                      //   }
-                      // }
-          else {
-                        String onlineAmount = _onlineController.text.trim();
-                        if (onlineAmount.isNotEmpty) {
-                          double onlineValue = double.tryParse(onlineAmount) ?? 0.0;
-                          if (onlineValue <= emiAmountRemaining) {
-                            print("Processing online payment with amount: $onlineAmount");
-                            // Add your online payment logic here.
-                            Navigator.pop(context);
-                          } else {
-                            print("Entered amount exceeds the remaining EMI amount: $emiAmountRemaining");
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Entered amount must be less or equal to $emiAmountRemaining"),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        } else {
-                          print("Please enter a valid amount for online payment");
-                        }
+                   else {
+                     //   String onlineAmount = _onlineController.text.trim();
+                        // if (onlineAmount.isNotEmpty) {
+                        //   double onlineValue = double.tryParse(onlineAmount) ?? 0.0;
+                        //   if (onlineValue <= emiAmountRemaining) {
+                        //     print("Processing online payment with amount: $onlineAmount");
+                        //     // Add your online payment logic here.
+                        //     Navigator.pop(context);
+                        //   } else {
+                        //     print("Entered amount exceeds the remaining EMI amount: $emiAmountRemaining");
+                        //     ScaffoldMessenger.of(context).showSnackBar(
+                        //       SnackBar(
+                        //         content: Text("Entered amount must be less or equal to $emiAmountRemaining"),
+                        //         backgroundColor: Colors.red,
+                        //       ),
+                        //     );
+                        //   }
+                        // } else {
+                        //   print("Please enter a valid amount for online payment");
+                        // }
                       }
                     },
 
-                    // onPressed: () {
-                    //   if (selectedPaymentMethod == 'Cash') {
-                    //     String offlineAmount = _offlineController.text.trim();
-                    //     if (offlineAmount.isNotEmpty) {
-                    //       payOfflineLoan(context, offlineAmount);
-                    //     } else {
-                    //       print("Please enter a valid amount for offline payment");
-                    //     }
-                    //   } else {
-                    //     String onlineAmount = _onlineController.text.trim();
-                    //     if (onlineAmount.isNotEmpty) {
-                    //       print("Processing online payment with amount: $onlineAmount");
-                    //       // Add your online payment logic here.
-                    //
-                    //       //no api
-                    //
-                    //       Navigator.pop(context);
-                    //     } else {
-                    //       print("Please enter a valid amount for online payment");
-                    //     }
-                    //   }
-                    // },
                     child: Text(
                       "Submit",
                       style: TextStyle(
@@ -649,13 +605,22 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
     }
 
     var selectedPlan = paymentPlans[_currentIndex];
+
     var planId = selectedPlan['id'];
 
     var months = selectedPlan['no_of_months'];
 
-    var emi = selectedPlan['total_no_of_emi'];
 
-    var installid = selectedPlan['installment_id'];
+    // var emi = selectedPlan['total_no_of_emi'];
+    // int emix = emi.toInt(); // safe if it's always a number
+
+    String rawEmi = selectedPlan['total_no_of_emi'] ?? '0';
+    int emix = double.tryParse(rawEmi)?.toInt() ?? 0;
+
+//    var emi = selectedPlan['total_no_of_emi'];
+    print('emi $emix');
+
+    var installid = selectedPlan['plan_id'];
 
     var emiamountremain = selectedPlan['emi_amount_remaining'];
 
@@ -671,7 +636,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
 
     "loan_amount":double.tryParse(amount) ?? 0,
     "no_of_months":months,
-    "no_of_emi":emi,
+    "no_of_emi":emix,
     "installment_id":installid,
     "loan_id": planId
 
@@ -842,7 +807,7 @@ class _LoanHistoryListState extends State<LoanHistoryList> {
               leading: CircleAvatar(
                 radius: 37,
                 backgroundColor: Colors.white,
-                backgroundImage: AssetImage('assets/images/umbrella.png'),
+                backgroundImage: AssetImage('assets/images/handshake.png'),
               ),
               title: Text(
                 _extractDate(payment['payment_date']),

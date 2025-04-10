@@ -63,7 +63,53 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   late bool _billingAddress;
   double? _couponDiscount;
 
+  String environmentValue = 'PRODUCTION';
+  String merchantId = "M22J5SI2LQ62U";
+  //String environmentValue = 'SANDBOX';
+  //String merchantId = "MANISHJEWELUAT"; //testing
 
+
+  String flowId = ""; // Pass the user id or the unique string
+  String packageName = "com.phonepe.simulator";
+
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //
+  //   final splashController = Provider.of<SplashController>(context, listen: false);
+  //   final checkoutController = Provider.of<CheckoutController>(context, listen: false);
+  //   final couponController = Provider.of<CouponController>(context, listen: false);
+  //   final authController = Provider.of<AuthController>(context, listen: false);
+  //
+  //   Provider.of<AddressController>(context, listen: false).getAddressList();
+  //   couponController.removePrevCouponData();
+  //   Provider.of<CartController>(context, listen: false).getCartData(context);
+  //   checkoutController.resetPaymentMethod();
+  //   Provider.of<ShippingController>(context, listen: false).getChosenShippingMethod(context);
+  //
+  //   // Debug logs for config and offlinePayment
+  //   final configModel = splashController.configModel;
+  //   print("ConfigModel: $configModel");
+  //   print("OfflinePayment: ${configModel?.offlinePayment}");
+  //
+  //   if (configModel != null && configModel.offlinePayment != null) {
+  //     checkoutController.getOfflinePaymentList();
+  //   }
+  //
+  //   if (authController.isLoggedIn()) {
+  //     couponController.getAvailableCouponList();
+  //   }
+  //
+  //   checkoutController.initPhonePeSdk('PRODUCTION','M22J5SI2LQ62U','7c9e6679-7425-40de-944b-e07fc1f90ae7',true);
+  //
+  //   _billingAddress = splashController.configModel?.billingInputByCustomer == 1;
+  //
+  //   checkoutController.clearData();
+  //
+  //   // OPTIONAL: call initPhonePeSdk() here if needed
+  //   // checkoutController.initPhonePeSdk(); // only if safe here
+  // }
 
   @override
   void initState() {
@@ -73,6 +119,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     Provider.of<CartController>(context, listen: false).getCartData(context);
     Provider.of<CheckoutController>(context, listen: false).resetPaymentMethod();
     Provider.of<ShippingController>(context, listen: false).getChosenShippingMethod(context);
+
+    final checkoutController = Provider.of<CheckoutController>(context, listen: false);
+
     if(Provider.of<SplashController>(context, listen: false).configModel != null &&
         Provider.of<SplashController>(context, listen: false).configModel!.offlinePayment != null)
     {
@@ -82,6 +131,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     if(Provider.of<AuthController>(context, listen: false).isLoggedIn()){
       Provider.of<CouponController>(context, listen: false).getAvailableCouponList();
     }
+
+
+       checkoutController.initPhonePeSdk('PRODUCTION','M22J5SI2LQ62U','7c9e6679-7425-40de-944b-e07fc1f90ae7',true);
+       checkoutController.clearData();
+
+
 
     _billingAddress = Provider.of<SplashController>(Get.context!, listen: false).configModel!.billingInputByCustomer == 1;
     Provider.of<CheckoutController>(context, listen: false).clearData();

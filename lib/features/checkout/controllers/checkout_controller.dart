@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter_sixvalley_ecommerce/data/model/api_response.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/domain/services/checkout_service_interface.dart';
@@ -9,13 +12,37 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/screens/digital_payment_order_place_screen.dart';
+import 'package:path/path.dart';
+import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../manishecommerceinvestment/payment/payment_status.dart';
 
 
 
 class CheckoutController with ChangeNotifier {
   final CheckoutServiceInterface checkoutServiceInterface;
   CheckoutController({required this.checkoutServiceInterface});
+
+  String environmentValue = 'PRODUCTION';
+  String merchantId = "M22J5SI2LQ62U";
+  //String environmentValue = 'SANDBOX';
+  //String merchantId = "MANISHJEWELUAT"; //testing
+
+
+  String flowId = "7c9e6679-7425-40de-944b-e07fc1f90ae7";
+
+
+  void initPhonePeSdk(String environmentValue, String merchantId, String flowId, bool enableLogs) {
+    PhonePePaymentSdk.init(environmentValue, merchantId, flowId, enableLogs)
+        .then((isInitialized) {
+      print("PhonePe SDK Initialized: $isInitialized");
+      // You can update UI or state here
+    }).catchError((error) {
+      print("Error in initializing PhonePe SDK: $error");
+      // Handle the error accordingly
+    });
+  }
 
   int? _addressIndex;
   int? _billingAddressIndex;
@@ -227,13 +254,35 @@ class CheckoutController with ChangeNotifier {
     String? paymentMethod}) async {
     _isLoading =true;
 
+
+
     ApiResponse apiResponse = await checkoutServiceInterface.digitalPaymentPlaceOrder(orderNote, customerId, addressId, billingAddressId, couponCode, couponDiscount, paymentMethod, _isCheckCreateAccount, passwordController.text.trim());
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _addressIndex = null;
       _billingAddressIndex = null;
       sameAsBilling = false;
       _isLoading = false;
-      Navigator.pushReplacement(Get.context!, MaterialPageRoute(builder: (_) => DigitalPaymentScreen(url: apiResponse.response?.data['redirect_link'])));
+
+
+
+
+
+     String orderId = apiResponse.response?.data['orderId'];
+     int merchantOrderId = apiResponse.response?.data['merchantOrderId'];
+     String tokenvar = apiResponse.response?.data['token'];
+
+
+      Future.delayed(Duration(seconds: 3), () {
+        startPhonePeTransaction(Get.context!,orderId, merchantOrderId.toString(), tokenvar);
+      });
+
+
+      // Navigator.pushReplacement(Get.context!, MaterialPageRoute(builder: (_) =>
+      //     DigitalPaymentScreen(
+      //     url: apiResponse.response?.data['redirect_link']
+      //     )));
+
+
 
     } else if(apiResponse.error == 'Already registered '){
       _isLoading = false;
@@ -266,5 +315,117 @@ class CheckoutController with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<String?> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_token');
+  }
+
+
+  Future<void> updatePaymentStatus(String merchantOrderId) async {
+    final url = Uri.parse('https://manish-jewellers.com/api/v1/payment-status-update/$merchantOrderId');
+
+    String? token = await getToken();
+    if (token == null) return;
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        // body: jsonEncode({
+        //   // Optional: only include if the API expects a body
+        //   'status': 'success',
+        // }),
+      );
+
+      if (response.statusCode == 200) {
+        print('✅ Payment orderrrr status updated successfully.');
+        print('token h yhn $token');
+        print('Final order payment Response: ${response.body}');
+      }
+      else {
+        print('❌ Failed with status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('⚠️ Error: $e');
+    }
+  }
+
+
+
+
+  void startPhonePeTransaction(BuildContext context,String orderId, String merchantOrderId, String token) {
+    try {
+      Map<String, dynamic> payload = {
+        "orderId": orderId,
+        "merchantId": merchantOrderId,
+        "token": token,
+        "paymentMode": {"type": "PAY_PAGE"}
+      };
+
+      String request = jsonEncode(payload);
+      print("Payment Request: $request");
+
+      PhonePePaymentSdk.startTransaction(request, "appSchema") // replace with actual schema
+          .then((response) {
+        if (response != null) {
+          String status = response['status'].toString();
+          String error = response['error'].toString();
+          if (status == 'SUCCESS') {
+            print("Flow Completed - Status: Success!");
+            // Navigate to payment status page or handle success
+
+
+            print("Used order id: ${orderId} merchant order id: ${merchantOrderId}");
+
+            updatePaymentStatus('$merchantOrderId');
+
+
+            Future.delayed(Duration(seconds: 3), () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentStatusPage(
+                    id: merchantOrderId,
+                  ), // Replace with your widget
+                ),
+              );
+              print('Merchant order id :$merchantOrderId');
+            });
+
+
+
+
+
+          } else {
+            print("Flow Completed - Status: $status and Error: $error");
+            // Navigate to payment status page or handle error
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PaymentStatusPage(
+                  id: merchantOrderId,
+                ), // Replace with your widget
+              ),
+            );
+          }
+        } else {
+          print("Flow Incomplete");
+          // Handle incomplete flow
+        }
+      }).catchError((error) {
+        print("Error in transaction: $error");
+        // Handle error
+      });
+    } catch (error) {
+      print("Error: $error");
+      // Handle error
+    }
+  }
+
 
 }

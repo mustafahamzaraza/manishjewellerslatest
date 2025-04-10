@@ -1,5 +1,9 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_button_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_textfield_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
@@ -321,13 +325,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                               email: isNumber ? null : userInput,
                                               password: password,
                                             ));
-                                          } else {
+                                          }
+                                          else {
                                             // authProvider.clearUserLogData();
                                           }
-                                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const DashBoardScreen()), (route) => false);
+
+                                          // String? devicetoken;
+                                          // FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+                                          //   print("🔄 FCM Token refreshed: $newToken");
+                                          //   devicetoken = newToken;
+                                          //   // Send the updated token to server if user is still logged in
+                                          // });
+                                          // print('token new device $devicetoken');
+                                          //Future.delayed(const Duration(seconds: 3), () {
+                                           // setState(() {
+                                              // Here you can write your code for open new view
+                                              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const DashBoardScreen()), (route) => false);
+                                            //});
+                                          //});
                                         }
                                       });
-
                                     }
                                   },
                                 ) :

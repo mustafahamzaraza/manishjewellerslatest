@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_sixvalley_ecommerce/features/dashboard/screens/dashboard_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment/payment_status.dart';
 import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/payment_webview.dart';
@@ -13,6 +14,7 @@ import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import 'dart:async';
 import '../features/gold/payment_webview.dart';
+import '../main.dart';
 import '../utill/colornew.dart';
 import 'gb.dart';
 import 'dart:convert';
@@ -32,7 +34,9 @@ import 'package:flutter_sixvalley_ecommerce/manishecommerceinvestment/pp.dart';
 import 'package:shared_preferences/shared_preferences.dart';// If you are using custom colors
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-
+import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'dart:convert';
 
 
 
@@ -45,7 +49,7 @@ class PlanDetailScreen extends StatefulWidget {
   State<PlanDetailScreen> createState() => _PlanDetailScreenState();
 }
 
-class _PlanDetailScreenState extends State<PlanDetailScreen> {
+class _PlanDetailScreenState extends State<PlanDetailScreen> with WidgetsBindingObserver{
 
 
 
@@ -138,6 +142,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
  @override
  void initState() {
    super.initState();
+   WidgetsBinding.instance.addObserver(this);
    GlobalPlan().setPlanDetails(widget.planId);
    fetchGoldPrices();
 
@@ -182,6 +187,64 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
  }
 
+  // @override
+  // void dispose() {
+  //   WidgetsBinding.instance.removeObserver(this);
+  //   super.dispose();
+  // }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async{
+    if (state == AppLifecycleState.resumed) {
+      // App is back from PhonePe
+      final prefs = await SharedPreferences.getInstance();
+    //  await prefs.getString('mandate');
+
+      final mandate = prefs.getString('mandate');
+
+      await Future.delayed(Duration(seconds: 3));
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Resumed on Plan Details Init with mandate id $mandate')),
+      //);
+      checkMandateStatus(mandate.toString());
+    }
+  }
+
+
+  Future<void> checkMandateStatus(String mandateId) async {
+    final url = Uri.parse(
+        'https://manish-jewellers.com/api/v1/phonepe/subscription/status/$mandateId');
+
+    try {
+      String? token = await getToken();
+      final response = await http.post(url, headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("Mandate Status Success: $data");
+
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("✅ Payment Flow Completed with proper mandateid")),
+        // );
+      } else {
+        print("Mandate check failed: ${response.statusCode}");
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(
+        //         "❌ Payment process failed (${response.statusCode})"),
+        //     backgroundColor: Colors.red,
+        //     duration: Duration(seconds: 3),
+        //   ),
+        // );
+      }
+    } catch (e) {
+      print("Mandate check error: $e");
+    }
+  }
 
 
 
@@ -206,9 +269,6 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
 
   void startTransaction() async {
-
-
-
     try {
 
       Map<String, dynamic> payload = {
@@ -271,13 +331,13 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
   }
 
 
-  void getInstalledApps() {
-    if (Platform.isAndroid) {
-      getInstalledUpiAppsForAndroid();
-    } else {
-      print("Develop Code");
-    }
-  }
+  // void getInstalledApps() {
+  //   if (Platform.isAndroid) {
+  //     getInstalledUpiAppsForAndroid();
+  //   } else {
+  //     print("Develop Code");
+  //   }
+  // }
 
   void getInstalledUpiAppsForAndroid() {
     PhonePePaymentSdk.getUpiAppsForAndroid()
@@ -451,6 +511,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
        requestorderId = jsonResponse['orderId'];
        requestToken = jsonResponse['token'];
        requestMerchantOrderId = jsonResponse['merchantOrderId'];
+
+
+
        print('Order ID: $requestorderId');
        print('Token: $requestToken');
 
@@ -565,7 +628,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                        borderRadius: BorderRadius.circular(8),
                      ),
                      hintText: selectedPaymentMethod == 'Cash'
-                         ? "Add minimum amount 100"
+                         ? "Add minimum amount 500"
                          : selectedPaymentMethod == 'Razorpay'
                          ? "Enter amount (2% Tax applies)"
                          : "Enter amount",
@@ -617,48 +680,51 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                          Text("Cash"),
                        ],
                      ),
-                     // Row(
-                     //   mainAxisSize: MainAxisSize.min,
-                     //   children: [
-                     //     Radio<String>(
-                     //       value: 'Auto',
-                     //       groupValue: selectedPaymentMethod,
-                     //       onChanged: (value) {
-                     //         setState(() {
-                     //           selectedPaymentMethod = value!;
-                     //         });
-                     //         showDialog(
-                     //           context: context,
-                     //           builder: (context) {
-                     //             return DailySavingsDialog(
-                     //               onSetupSavings: (double deductedAmount, double goldAcquiredtx) {
-                     //                 _processRazorpayPayment(context, deductedAmount, goldAcquiredtx);
-                     //               },
-                     //             );
-                     //           },
-                     //         );
-                     //
-                     //       },
-                     //     ),
-                     //     Text("Automated Payment"),
-                     //   ],
-                     // ),
-                     // Row(
-                     //   mainAxisSize: MainAxisSize.min,
-                     //   children: [
-                     //     Radio<String>(
-                     //       value: 'Scan QR',
-                     //       groupValue: selectedPaymentMethod,
-                     //       onChanged: (value) {
-                     //         setState(() {
-                     //           selectedPaymentMethod = value!;
-                     //         });
-                     //        _showQRDialog(context);
-                     //       },
-                     //     ),
-                     //     Text("Scan QR"),
-                     //   ],
-                     // ),
+
+                     Row(
+                       mainAxisSize: MainAxisSize.min,
+                       children: [
+                         Radio<String>(
+                           value: 'AutoPay',
+                           groupValue: selectedPaymentMethod,
+                           onChanged: (value) {
+                             setState(() {
+                               selectedPaymentMethod = value!;
+                             });
+                            // _showQRDialog(context);
+
+                             if (value == 'AutoPay') {
+                               showDialog(
+                                 context: context,
+                                 builder: (BuildContext context) {
+                                   return DailySavingsDialog(
+                                     onSetupSavings: (amount, goldAcquired) {
+
+                                       print("Daily amount: $amount");
+                                       print("Gold Acquired: $goldAcquired grams");
+
+                                     },
+                                     planName: planName.toString(),
+                                     planCat: planCat.toString(),
+                                     goldAcquired: goldAcquired.toString(),
+                                     installid: 0,
+                                   );
+                                 },
+                               );
+
+                               // Navigator.push(
+                               //   context,
+                               //   MaterialPageRoute(builder: (context) => SavingsScreen(
+                               //     planCat: '', planName: '', goldAcquired: '',
+                               //
+                               //   )),
+                               // );
+                             }
+                           },
+                         ),
+                         Text("AutoPay"),
+                       ],
+                     ),
                    ],
                  ),
                  SizedBox(height: 16),
@@ -677,57 +743,64 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                      ),
 
 
+         onPressed: () async {
+         print("method: $selectedPaymentMethod");
 
-                     onPressed: () async {
-                       print("method: $selectedPaymentMethod");
+         if (selectedPaymentMethod == 'Cash') {
+         String offlineAmount = _offlineController.text.trim();
+         double? amount = double.tryParse(offlineAmount);
 
-                       if (selectedPaymentMethod == 'Cash') {
-                         String offlineAmount = _offlineController.text.trim();
-                         double? amount = double.tryParse(offlineAmount);
+         if (amount == null || amount < 500) {
+         ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(content: Text("Amount must be greater than 500 for cash payments.")),
+         );
+         return;
+         }
+         else {
+           await payOffline(
+             context,
+             offlineAmount,
+             planCat.toString(),
+             planName.toString(),
+             goldAcquired.toString(),
+           );
+          }
+         }
 
-                         if (amount == null || amount < 100) {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                             SnackBar(content: Text("Amount must be greater than 100 for cash payments.")),
-                           );
-                           return;
-                         } else {
-                           await payOffline(
-                             context,
-                             offlineAmount,
-                             planCat.toString(),
-                             planName.toString(),
-                             goldAcquired.toString(),
-                           );
+         else if (selectedPaymentMethod == 'Razorpay') {
+         String onlineAmount = _onlineController.text.trim();
 
-                           // await _showConfirmationDialog(context);
-                         }
-                       }
+         if (onlineAmount.isNotEmpty) {
+         await _startRazorpayPayment(context);
 
-                       else if (selectedPaymentMethod == 'Razorpay') {
-                         String onlineAmount = _onlineController.text.trim();
+         // Show loading dialog
+         showDialog(
+         context: context,
+         barrierDismissible: false, // Prevent dismiss by tapping outside
+         builder: (context) {
+         return Center(
+         child: CircularProgressIndicator(),
+         );
+         },
+         );
 
-                         if (onlineAmount.isNotEmpty) {
-                           await _startRazorpayPayment(context);
+         await Future.delayed(Duration(seconds: 3)); // Wait 3 seconds
 
-                            await Future.delayed(Duration(seconds: 3)); // ⏳ Wait 3 seconds
-                            await _showConfirmationDialog(context);
+         // Close loading dialog
+         Navigator.of(context).pop();
 
+         // Then show confirmation dialog
+         await _showConfirmationDialog(context);
 
-                         } else {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                             SnackBar(content: Text("Please enter a valid amount for online payment")),
-                           );
-                         }
-                       }
-                     }
+         } else {
+         ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(content: Text("Please enter a valid amount for online payment")),
+         );
+         }
+         }
+         },
 
-
-
-
-
-
-
-         ,child: Text(
+         child: Text(
                        "Submit",
                        style: TextStyle(color: Colors.white),
                      ),
@@ -751,7 +824,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
    _goldWeightController.close();
    _deductedAmountController.close();
    _onlineController.dispose();
-
+   WidgetsBinding.instance.removeObserver(this);
    super.dispose();
  }
 
@@ -771,20 +844,20 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       planTitle = 'First Plan';
       planDuration = '13 Months (12+1)';
       planDescription = 'Invest for 12 months, & we pay your 13th installment!';
-      planDetails = "Details: Customers pay for 12 \nmonths and Manish Jewellers adds\n the installment.The amount added \nwill be based on the monthly \naverage of the customers's install\n-ments.";
-      details2 = 'Example: If a customer pays \nRs10,000 per month for 12 months\nManish Jewellers will contribute \n Rs10,000 as the 13th installment.';// Example text for plan 1
+      planDetails = "Details: Customers pay for 12 months and Manish Jewellers adds the installment.The amount added will be based on the monthly average of the customers's installments.";
+      details2 = 'Example: If a customer pays Rs10,000 per month for 12 months Manish Jewellers will contribute  Rs10,000 as the 13th installment.';// Example text for plan 1
     } else if (widget.planId == 2) {
       planTitle = 'Second Plan';
       planDuration = '20 Months (18+2)';
       planDescription = 'Invest for 18 months, & we pay your 19–20th installment!';
-      planDetails = "Details: Customers pay for 18 months\nand Manish Jewellers add the \n installment.The amount added will be\n based on the monthly average of the \ncustomer's installments.";
-      details2 = "Example: If a customer pays Rs10,000 \nper month for 18 months, Manish \nJewellers will contribute Rs10,000 \nas the 19th installment, and Rs10,000 \nas the 20th installment.";// Example text for plan 2
+      planDetails = "Details: Customers pay for 18 months and Manish Jewellers add the installment.The amount added will be based on the monthly average of the customer's installments.";
+      details2 = "Example: If a customer pays Rs10,000 per month for 18 months, Manish Jewellers will contribute Rs10,000 as the 19th installment, and Rs10,000 as the 20th installment.";// Example text for plan 2
     } else {
       planTitle = 'Third Plan';
       planDuration = '28 Months (24+4)';
       planDescription = 'Invest for 24 months, & we pay your 25–28th installment!';
-      planDetails = "Details: Customers pay for 24 months\nand Manish Jewellers add the \ninstallment.The amount added will be \nbased on the monthly average of the\n customer's installments."; // Example text for plan 3
-      details2 = "Example: If a customer pays Rs10,000 \nper month for 24 months, Manish\n Jewellers will contribute 25th,26th,\n27th and 28th installment.\n(i.e. 10,000x4 = Rs40,000)";
+      planDetails = "Details: Customers pay for 24 months and Manish Jewellers add the installment.The amount added will be based on the monthly average of the customer's installments."; // Example text for plan 3
+      details2 = "Example: If a customer pays Rs10,000 per month for 24 months, Manish Jewellers will contribute 25th,26th,27th and 28th installment.(i.e. 10,000x4 = Rs40,000)";
     }
 
     return Scaffold(
@@ -819,6 +892,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                       context,
                       MaterialPageRoute(builder: (context) => DashBoardScreen()),
                     );
+
                   },
                   child: const CircleAvatar(
                     radius: 30,
@@ -840,71 +914,6 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           ),
         ],
       ),
-      // bottomNavigationBar: Container(
-      //   decoration: const BoxDecoration(
-      //     borderRadius: BorderRadius.only(topRight: Radius.circular(500),topLeft: Radius.circular(500),),
-      //     color: Color(0xfff2f2f2),
-      //     boxShadow: [
-      //       BoxShadow(
-      //         color: Colors.grey,
-      //         offset: Offset(5.0, 10.0), //(x,y)
-      //         blurRadius: 20.0,
-      //       ),
-      //     ],
-      //   ),
-      //   child: ClipRRect(
-      //     borderRadius: const BorderRadius.only(topRight: Radius.circular(180),topLeft: Radius.circular(180),),
-      //     child: BottomNavigationBar(
-      //             type: BottomNavigationBarType.fixed,
-      //             backgroundColor: AppColors.glowingGold, // Adjust your custom color
-      //             selectedItemColor: Colors.blueGrey,
-      //             unselectedItemColor: Colors.black54,
-      //             showSelectedLabels: false,
-      //             showUnselectedLabels: false,
-      //       items: [
-      //         BottomNavigationBarItem(
-      //           icon: Transform.translate(
-      //             offset: const Offset(0, 8), // Shift the icon downward by 8 pixels
-      //             child: Padding(
-      //                 padding: EdgeInsets.only(left: 30),
-      //                 child: Image.asset('assets/images/home.png',fit: BoxFit.cover,width: 50,height: 50)),
-      //           ),
-      //           label: 'Home',
-      //         ),
-      //         BottomNavigationBarItem(
-      //           icon: Transform.translate(
-      //             offset: const Offset(0, 8), // Shift the icon downward by 8 pixels
-      //             child: Image.asset('assets/images/payment.png',fit: BoxFit.cover,width: 50,height: 50,),
-      //           ),
-      //           label: 'Earnings',
-      //         ),
-      //         BottomNavigationBarItem(
-      //           icon: Transform.translate(
-      //             offset: const Offset(0, 8), // Shift the icon downward by 8 pixels
-      //             child: Image.asset('assets/images/loan.png',fit: BoxFit.cover,width: 50,height: 50,),
-      //           ),
-      //           label: 'Payments',
-      //         ),
-      //         BottomNavigationBarItem(
-      //           icon: Transform.translate(
-      //             offset: const Offset(0, 8), // Shift the icon downward by 8 pixels
-      //             child: Image.asset('assets/images/noti.png',fit: BoxFit.cover,width: 50,height: 50,),
-      //           ),
-      //           label: 'Notifications',
-      //         ),
-      //         BottomNavigationBarItem(
-      //           icon: Transform.translate(
-      //             offset: const Offset(0, 8), // Shift the icon downward by 8 pixels
-      //             child: Padding(
-      //                 padding: EdgeInsets.only(right: 30),
-      //                 child: Image.asset('assets/images/pro.png',fit: BoxFit.cover,width: 50,height: 50,)),
-      //           ),
-      //           label: 'Profile',
-      //         ),
-      //       ],
-      //     ),
-      //   ),
-      // ),
     );
   }
 
@@ -958,13 +967,32 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                   ),
               
                   SizedBox(height: 8),
-                  Text(
-                    description,
-                    softWrap: true,
-                    style: const TextStyle(fontSize: 11),
+                  // Text(
+                  //   description,
+                  //   softWrap: true,
+                  //   textAlign: TextAlign.justify,
+                  //   style: const TextStyle(fontSize: 11),
+                  // ),
+                  // const SizedBox(height: 12),
+
+                  Row(
+                    children: [
+                      // Icon(Icons.circle,size: 7,color: Colors.black,),
+                      //  SizedBox(width: 3,),
+                      Expanded(
+                        child: Text(
+                          description,
+                          softWrap: true,
+                          textAlign: TextAlign.justify,
+                          style: const TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: Colors.black54),
+                        ),
+                      ),
+
+                    ],
+
                   ),
-                  const SizedBox(height: 12),
-              
+
+
                   Row(
                     children: [
                      // Icon(Icons.circle,size: 7,color: Colors.black,),
@@ -973,6 +1001,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                         child: Text(
                           details,
                           softWrap: true,
+                          textAlign: TextAlign.justify,
                           style: const TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: Colors.black54),
                         ),
                       ),
@@ -1140,21 +1169,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                         }
                             : null,
               
-                        // onPressed: ()  {
-                        //
-                        //  // payOffline();
-                        //   showDialog(
-                        //     context: context,
-                        //     builder: (BuildContext context) {
-                        //       return _paymentConfirmationDialog(context);
-                        //     },
-                        //   );
-                        //
-                        //
-                        //   ///
-                        //
-                        //
-                        // },
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
                           shape: RoundedRectangleBorder(
@@ -1233,131 +1248,678 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
 
 
-class DailySavingsDialog extends StatefulWidget {
-  final Function(double, double) onSetupSavings; // Callback function
 
-  DailySavingsDialog({required this.onSetupSavings});
+
+
+
+
+
+
+
+
+
+
+
+
+// Utility extension
+extension StringCasingExtension on String {
+  String capitalize() =>
+      this.length > 0 ? '${this[0].toUpperCase()}${this.substring(1).toLowerCase()}' : '';
+}
+
+class DailySavingsDialog extends StatefulWidget {
+  final Function(double, double) onSetupSavings;
+  final String planName;
+  final String planCat;
+  final String goldAcquired;
+  final int installid;
+
+  DailySavingsDialog({
+    required this.onSetupSavings,
+    required this.planName,
+    required this.planCat,
+    required this.goldAcquired,
+    required this.installid
+  });
 
   @override
   _DailySavingsDialogState createState() => _DailySavingsDialogState();
 }
 
-class _DailySavingsDialogState extends State<DailySavingsDialog> {
+class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBindingObserver {
   final TextEditingController _amountController = TextEditingController();
-  int selectedAmount = 50;
+  int? selectedAmount = 50;
+  String selectedFrequency = "DAILY";
+  bool _apiCalled = false;
+  String? _mandateId;
+  String? _lastMandateId;
+
+  // 👇 This line must be present
+  final List<int> amounts = [500,700, 1000, 1500, 2000, 3000, 4000, 5000];
+
+  static const int weeklyMinAmount = 500;
+  static const int monthlyMinAmount = 2000;
+
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _amountController.text = selectedAmount.toString();
   }
 
   @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  void launchPhonePeIntent(String intentUrl) async {
+    if (await canLaunchUrl(Uri.parse(intentUrl))) {
+      await launchUrl(Uri.parse(intentUrl),
+          mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch $intentUrl';
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed && !_apiCalled) {
+      _apiCalled = true;
+
+      final prefs = await SharedPreferences.getInstance();
+      final Id = prefs.getString('mandate');
+
+      // Use Future.microtask or delay to ensure proper context
+      Future.microtask(() {
+        rootScaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text("Checking payment status...",style: TextStyle(color: Colors.redAccent,fontWeight: FontWeight.bold),)),
+        );
+      });
+
+      await Future.delayed(Duration(seconds: 3));
+      if (Id != null) checkMandateStatus(Id);
+    }
+  }
+
+  Future<void> checkMandateStatus(String mandateId) async {
+    final url = Uri.parse(
+        'https://manish-jewellers.com/api/v1/phonepe/subscription/status/$mandateId');
+
+    try {
+      String? token = await getToken();
+      final response = await http.post(url, headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("Mandate Status Success: $data");
+
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("✅ Payment Flow Completed with proper mandateid")),
+        // );
+      } else {
+        print("Mandate check failed: ${response.statusCode}");
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(
+        //         "❌ Payment process failed (${response.statusCode})"),
+        //     backgroundColor: Colors.red,
+        //     duration: Duration(seconds: 3),
+        //   ),
+        // );
+      }
+    } catch (e) {
+      print("Mandate check error: $e");
+    }
+  }
+
+  Future<void> createMandate(double amount, String frequency , int ipid) async {
+    String? token = await getToken();
+    final url =
+    Uri.parse('https://manish-jewellers.com/api/v1/mandate/create');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    String getCurrentDate() {
+      return DateFormat('yyyy-MM-dd').format(DateTime.now());
+    }
+
+    final body = jsonEncode({
+      "installment_payment_id" : "${ipid.toString()}",
+      "amount": amount,
+      "frequency": frequency,
+      "deviceOS": "ANDROID",
+      'plan_code': widget.planCat,
+      'plan_category': widget.planName,
+      'total_yearly_payment': '0',
+      'total_gold_purchase': widget.goldAcquired,
+      'start_date': getCurrentDate(),
+      "details": [
+        {
+          "monthly_payment": amount,
+          "purchase_gold_weight": widget.goldAcquired
+        }
+      ],
+      "no_of_months": GlobalPlan().months.toString()
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final String? intentUrl = data['response']?['intentUrl'];
+        final String? mandateId = data['mandate_id'];
+
+        print("Intent URL: $intentUrl");
+        print("Mandate ID: $mandateId");
+
+        _mandateId = mandateId;
+        _lastMandateId = mandateId;
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('mandate', _mandateId ?? 'null');
+
+        //await Future.delayed(Duration(seconds: 3));
+
+        if (intentUrl != null) launchPhonePeIntent(intentUrl);
+      } else {
+        print('Failed with status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
+  int currentIndex = 0;
+
+
+
+
+  @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Daily Savings",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      backgroundColor: Color(0xFF1E005A), // Dark purple background
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Color(0xFF1E005A),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Title
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Automate your savings",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
+              ),
+              SizedBox(height: 20),
+          
+              // White card
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Headline
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_month, color: Colors.purple),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              text: "Save ",
+                              style: TextStyle(color: Colors.black, fontSize: 16),
+                              children: [
+                                TextSpan(
+                                  text: "$selectedFrequency ",
+                                  style: TextStyle(
+                                    color: Colors.purple,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "to fulfil every small and big goal",
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+          
+                    // Frequency Chips
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: ["Daily", "Weekly", "Monthly"].map((type) {
+                          final isSelected = selectedFrequency == type;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: ChoiceChip(
+                              label: Text(
+                                isSelected ? "⭐ $type" : type,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.black,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                              selected: isSelected,
+                              selectedColor: Colors.purple,
+                              backgroundColor: Colors.grey[200],
+                              onSelected: (_) {
+                                setState(() => selectedFrequency = type);
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+          
+          
+                  ],
+                ),
+              ),
+          
+              SizedBox(height: 10),
+          
+             // Promo Card
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.purple[200],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 1.0,bottom: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: List.generate(3, (index) {
+                          return AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            margin: EdgeInsets.symmetric(horizontal: 4),
+                            width: currentIndex == index ? 16 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: currentIndex == index ? Colors.white : Colors.white54,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+          
+                    Row(
+                      children: [
+                        Icon(Icons.whatshot, color: Colors.blue, size: 20),
+                        SizedBox(width: 6),
+                        Text("FOR YOU"),
+                      ],
+                    ),
+                    Row(
+          
+                      children: [
+          
+          
+                        Expanded(
+                          child: Text(
+                            "User’s consistent savings helped them own pure gold today!",
+                            style: TextStyle(color: Colors.white, fontSize: 11),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Image.asset("assets/images/user.png", height: 50,color: Colors.blue,),
+                      ],
+                    ),
+          
+                  ],
                 )
-              ],
-            ),
-            SizedBox(height: 10),
-            Text(
-              "Reach your goal",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            Text(
-              "3X faster by saving daily",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.pink),
-            ),
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(Icons.savings, color: Colors.amber),
-                SizedBox(width: 5),
-                Text("Your money is saved in 24K gold")
-              ],
-            ),
-            SizedBox(height: 10),
-            Text("Enter amount you want to save daily"),
-            SizedBox(height: 5),
-            TextField(
-              controller: _amountController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                prefixText: "₹ ",
               ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 10),
-            Wrap(
-              spacing: 10,
-              children: [50, 100, 150, 200, 500].map((amount) {
-                return ChoiceChip(
-                  label: Text("₹$amount",
+          
+              SizedBox(height: 20),
+          
+              // Amount Selection
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Select amount to save",
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+              SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                children: amounts.map((amt) {
+                  final isSelected = selectedAmount == amt;
+                  return ChoiceChip(
+                    label: Text(
+                      "₹$amt",
                       style: TextStyle(
-                          color: selectedAmount == amount ? Colors.white : Colors.black)),
-                  selected: selectedAmount == amount,
-                  selectedColor: Colors.purple,
-                  backgroundColor: Colors.grey[300],
-                  onSelected: (selected) {
-                    setState(() {
-                      selectedAmount = amount;
-                      _amountController.text = amount.toString();
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 15),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                minimumSize: Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              onPressed: () {
-                double amount = double.tryParse(_amountController.text) ?? 0.0;
-                double goldAcquired = amount / 6000; // Example price per gram
-
-                if (amount >= 50) {
-                  Navigator.pop(context); // Close the dialog first
-                  Future.delayed(Duration(milliseconds: 300), () {
-                    widget.onSetupSavings(amount, goldAcquired);
-                  });
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Please enter a valid amount")),
+                        color: isSelected ? Colors.white : Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    selected: isSelected,
+                    selectedColor: Colors.purple,
+                    backgroundColor: Colors.white,
+                    onSelected: (_) {
+                      setState(() => selectedAmount = amt);
+                    },
                   );
-                }
-              },
-              child: Text("Setup Daily Savings", style: TextStyle(color: Colors.white)),
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset("assets/images/gpay.png", height: 20),
-                SizedBox(width: 10),
-                SizedBox(width: 10),
-                Image.asset("assets/images/rpay.png", height: 60),
-              ],
-            )
-          ],
+                }).toList(),
+              ),
+          
+              SizedBox(height: 20),
+
+              TextField(
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: "Enter custom amount (min ₹50)",
+                  hintStyle: TextStyle(color: Colors.grey),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                ),
+                onChanged: (val) {
+                  double enteredAmt = double.tryParse(val) ?? 0;
+                  setState(() {
+                    selectedAmount = null; // Clear chip when typing
+                  });
+                  // double enteredAmt = double.tryParse(val) ?? 0;
+                  // if (enteredAmt >= 50) {
+                  //   setState(() {
+                  //     selectedAmount = 0; // Unselect chip if manual amount is entered
+                  //   });
+                  // }
+                },
+              ),
+
+              SizedBox(height: 15),
+              // Start Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+
+                  onPressed: () {
+                    double amount = selectedAmount != null && selectedAmount! > 0
+                        ? selectedAmount!.toDouble()
+                        : double.tryParse(_amountController.text.trim()) ?? 0.0;
+
+                    double goldAcquired = amount / 6000;
+
+                    bool isValidAmount = false;
+
+                    if (selectedFrequency == "Daily" && amount >= 50) {
+                      isValidAmount = true;
+                    } else if (selectedFrequency == "Weekly" && amount >= 500) {
+                      isValidAmount = true;
+                    } else if (selectedFrequency == "Monthly" && amount >= 2000) {
+                      isValidAmount = true;
+                    }
+
+                    if (isValidAmount) {
+                      Navigator.pop(context);
+                      Future.delayed(Duration(milliseconds: 300), () {
+                        widget.onSetupSavings(amount, goldAcquired);
+                      });
+
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            backgroundColor: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.check_circle, color: Colors.green, size: 60),
+                                  SizedBox(height: 15),
+                                  Text("Savings Set!",
+                                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                  SizedBox(height: 10),
+                                  Text("You've scheduled $selectedFrequency savings of",
+                                      style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+                                  SizedBox(height: 8),
+                                  Text("₹${amount.toStringAsFixed(0)} per $selectedFrequency",
+                                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.purple)),
+                                  SizedBox(height: 8),
+                                  Text("~${goldAcquired.toStringAsFixed(2)}g of 24K Gold/$selectedFrequency",
+                                      style: TextStyle(fontSize: 16, color: Colors.amber[800])),
+                                  SizedBox(height: 20),
+                                  Image.asset("assets/images/phonepe.png", height: 60),
+                                  SizedBox(height: 25),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          side: BorderSide(color: Colors.red),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10)),
+                                        ),
+                                        icon: Icon(Icons.close, color: Colors.red),
+                                        label: Text("Close", style: TextStyle(color: Colors.red)),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.purple,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10)),
+                                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        ),
+                                        icon: Icon(Icons.check, color: Colors.white),
+                                        label: Text("Confirm", style: TextStyle(color: Colors.white)),
+                                        onPressed: () {
+                                          createMandate(amount, selectedFrequency, widget.installid);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    } else {
+                      String minAmountMsg = selectedFrequency == "Weekly"
+                          ? "₹500"
+                          : selectedFrequency == "Monthly"
+                          ? "₹2000"
+                          : "₹50";
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text("Please enter a valid amount (min $minAmountMsg)"),
+                      ));
+                    }
+                  },
+
+
+
+                  // onPressed: () {
+                  //
+                  //
+                  //   // double amount = selectedAmount != null
+                  //   //     ? selectedAmount!.toDouble()
+                  //   //     : double.tryParse(_amountController.text) ?? 0.0;
+                  //   //
+                  //   // double goldAcquired = amount / 6000;
+                  //   //
+                  //   //
+                  //   // double amountsel = selectedAmount != null
+                  //   //     ? selectedAmount!.toDouble()
+                  //   //     : double.tryParse(_amountController.text) ?? 0.0;
+                  //   //
+                  //
+                  //   double amount = selectedAmount != null && selectedAmount! > 0
+                  //       ? selectedAmount!.toDouble()
+                  //       : double.tryParse(_amountController.text.trim()) ?? 0.0;
+                  //
+                  //   double goldAcquired = amount / 6000;
+                  //
+                  //
+                  //
+                  //   if (amount >= 1) {
+                  //
+                  //     Navigator.pop(context);
+                  //     Future.delayed(Duration(milliseconds: 300), () {
+                  //       widget.onSetupSavings(amount, goldAcquired);
+                  //     });
+                  //
+                  //     showDialog(
+                  //       context: context,
+                  //       builder: (BuildContext context) {
+                  //         return Dialog(
+                  //           shape: RoundedRectangleBorder(
+                  //               borderRadius: BorderRadius.circular(20)),
+                  //           backgroundColor: Colors.white,
+                  //           child: Padding(
+                  //             padding: const EdgeInsets.all(20.0),
+                  //             child: Column(
+                  //               mainAxisSize: MainAxisSize.min,
+                  //               children: [
+                  //                 Icon(Icons.check_circle,
+                  //                     color: Colors.green, size: 60),
+                  //                 SizedBox(height: 15),
+                  //                 Text("Savings Set!",
+                  //                     style: TextStyle(
+                  //                         fontSize: 20,
+                  //                         fontWeight: FontWeight.bold)),
+                  //                 SizedBox(height: 10),
+                  //                 Text(
+                  //                     "You've scheduled $selectedFrequency savings of",
+                  //                     style: TextStyle(fontSize: 16),
+                  //                     textAlign: TextAlign.center),
+                  //                 SizedBox(height: 8),
+                  //                 Text(
+                  //                     "₹${amount.toStringAsFixed(0)} per $selectedFrequency",
+                  //                     style: TextStyle(
+                  //                         fontSize: 22,
+                  //                         fontWeight: FontWeight.bold,
+                  //                         color: Colors.purple)),
+                  //                 SizedBox(height: 8),
+                  //                 Text(
+                  //                     "~${goldAcquired.toStringAsFixed(2)}g of 24K Gold/$selectedFrequency",
+                  //                     style: TextStyle(
+                  //                         fontSize: 16,
+                  //                         color: Colors.amber[800])),
+                  //                 SizedBox(height: 20),
+                  //                 Row(
+                  //                   mainAxisAlignment: MainAxisAlignment.center,
+                  //                   children: [
+                  //                     Image.asset("assets/images/phonepe.png",
+                  //                         height: 60),
+                  //                   ],
+                  //                 ),
+                  //                 SizedBox(height: 25),
+                  //                 Row(
+                  //                   mainAxisAlignment:
+                  //                   MainAxisAlignment.spaceEvenly,
+                  //                   children: [
+                  //                     OutlinedButton.icon(
+                  //                       style: OutlinedButton.styleFrom(
+                  //                         side: BorderSide(color: Colors.red),
+                  //                         shape: RoundedRectangleBorder(
+                  //                             borderRadius:
+                  //                             BorderRadius.circular(10)),
+                  //                       ),
+                  //                       icon:
+                  //                       Icon(Icons.close, color: Colors.red),
+                  //                       label: Text("Close",
+                  //                           style: TextStyle(color: Colors.red)),
+                  //                       onPressed: () {
+                  //                         Navigator.pop(context);
+                  //                       },
+                  //                     ),
+                  //                     ElevatedButton.icon(
+                  //                       style: ElevatedButton.styleFrom(
+                  //                         backgroundColor: Colors.purple,
+                  //                         shape: RoundedRectangleBorder(
+                  //                             borderRadius:
+                  //                             BorderRadius.circular(10)),
+                  //                         padding: EdgeInsets.symmetric(
+                  //                             horizontal: 20, vertical: 12),
+                  //                       ),
+                  //                       icon: Icon(Icons.check,
+                  //                           color: Colors.white),
+                  //                       label: Text("Confirm",
+                  //                           style:
+                  //                           TextStyle(color: Colors.white)),
+                  //                       onPressed: () {
+                  //                         createMandate(
+                  //                             amount, selectedFrequency, widget.installid);
+                  //                       },
+                  //                     ),
+                  //                   ],
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           ),
+                  //         );
+                  //       },
+                  //     );
+                  //   } else {
+                  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  //       content:
+                  //       Text("Please enter a valid amount (min ₹50)"),
+                  //     ));
+                  //   }
+                  // },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "Start $selectedFrequency Savings →",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1367,59 +1929,12 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> {
 
 
 
-
-
-
-
-void _showQRDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Container(
-        color: AppColors.white90,
-        child: Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Container(
-            color: AppColors.glowingGold,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Scan to Pay",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-                  Image.asset(
-                    'assets/images/qr.png', // Replace with your actual QR code image path
-                    height: 200,
-                    width: 200,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    "Scan this QR code to complete the payment.",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Close"),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  );
+extension on String {
+  String capitalize() => this[0].toUpperCase() + substring(1).toLowerCase();
 }
+
+
+
 
 Future<String?> getToken() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1440,6 +1955,7 @@ Future<void> payOffline(BuildContext context, String amount,String planCode,Stri
       'Accept': 'application/json',
       'Authorization': 'Bearer $token', // Use the token in the Authorization header
     };
+
 
     var request = http.MultipartRequest('POST', Uri.parse('https://manish-jewellers.com/api/v1/payments'));
     request.fields.addAll({

@@ -45,14 +45,14 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
-
+//
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
    //     applicationId "com.altaibagold.ordernow"
         applicationId = "com.banana.com"
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
-        versionCode 29
+        versionCode 47
         versionName flutterVersionName
         multiDexEnabled true //new
     }

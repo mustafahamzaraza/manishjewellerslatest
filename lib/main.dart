@@ -57,11 +57,20 @@ import 'features/gold/cont/paymentcontroller.dart';
 import 'helper/custom_delegate.dart';
 import 'localization/app_localization.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 final database = AppDatabase();
 
@@ -83,16 +92,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
 
-
-
-
   if(Firebase.apps.isEmpty) {
   if(Platform.isAndroid) {
     await Firebase.initializeApp(options: const FirebaseOptions(
-      apiKey: "AIzaSyCyBySSiefZitPw_SdtJ7MKv9w7bbwL4ug",
-      projectId: "altaibagold-12c2d",
-      messagingSenderId: "948376471552",
-      appId: "1:948376471552:android:68bfca084be82ab535b0e5"
+      apiKey: "AIzaSyA85FzkpPaOMBTVju5PMIVRc4kqUy1iGqU",
+      projectId: "manishjewellers-cf71a",
+      messagingSenderId: "448385715117",
+      appId: "1:448385715117:android:a7b41100df9e24ab736f24"
     ));
 
 
@@ -178,6 +184,12 @@ Future<void> main() async {
 
 
 
+
+
+
+
+
+
 //new
 Future<void> _initializeLocalNotifications() async {
   const AndroidInitializationSettings androidSettings =
@@ -254,6 +266,39 @@ class _MyAppState extends State<MyApp> {
     String? token = await FirebaseMessaging.instance.getToken();
     print('📲 FCM Token: $token');
     // TODO: Send token to your server
+    if (token == null) {
+      print("Failed to get FCM token.");
+      return;
+    }
+
+    // Prepare headers
+    var headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Prepare the request body
+    var body = json.encode({
+      "token": token, // sending actual FCM token here
+      "title": "Manish Jewellers",
+      "body": "This is a test push notification",
+      "data": {
+        "customKey": "customValue"
+      }
+    });
+
+    // Create and send the request
+    var request = http.Request('POST', Uri.parse('https://manish-jewellers.com/api/v1/send-notification'));
+    request.body = body;
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      print('token sent to api');
+    } else {
+      print('❌ Error: ${response.reasonPhrase} status code ${response.statusCode}');
+    }
   }
 
   void _listenToMessages() {
@@ -286,10 +331,12 @@ class _MyAppState extends State<MyApp> {
     // Example: Navigator.pushNamed(context, '/$screen');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => NotificationScreen()),
+      MaterialPageRoute(builder: (context)
+      => NotificationScreen()),
     );
   }
 //new
+
 
 
   @override
@@ -303,7 +350,9 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp(
           title: AppConstants.appName,
           navigatorKey: navigatorKey,
+          navigatorObservers: [routeObserver],
           debugShowCheckedModeBanner: false,
+          scaffoldMessengerKey: rootScaffoldMessengerKey, // ✅ Add this line
           theme: themeController.darkTheme ? dark : light(
             primaryColor: themeController.selectedPrimaryColor,
             secondaryColor: themeController.selectedPrimaryColor,

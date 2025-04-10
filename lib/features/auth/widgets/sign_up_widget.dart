@@ -1,4 +1,5 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/domain/models/register_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/widgets/condition_check_box_widget.dart';
@@ -241,7 +242,16 @@ class SignUpWidgetState extends State<SignUpWidget> {
                             register.phone = phoneNumber;
                             register.password = password;
                             register.referCode = _referController.text.trim();
-                            authProvider.registration(register, route, config!);
+                            FirebaseMessaging.instance.getToken().then((tokenn) {
+                              print("📱 Sign Up FCM Token: $tokenn");
+                              if (tokenn != null) {
+                                register.fcmToken = tokenn;
+                                authProvider.registration(register, route, config!);
+                              } else {
+                                showCustomSnackBar("Unable to get device token. Please try again.", context);
+                              }
+                            });
+                            // authProvider.registration(register, route, config!);
                           }
                         } : null, buttonText: getTranslated('sign_up', context),
                       ),

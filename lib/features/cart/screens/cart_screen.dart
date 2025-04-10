@@ -453,6 +453,9 @@ class CartScreenState extends State<CartScreen> {
                                                       style: textBold.copyWith(color: Provider.of<ThemeController>(context, listen: false).darkTheme?
                                                       Theme.of(context).hintColor : Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeLarge))),
 
+
+
+
                                                 if(shopClose)
                                                   JustTheTooltip(
                                                     backgroundColor: Colors.black87,
@@ -476,6 +479,11 @@ class CartScreenState extends State<CartScreen> {
 
                                       SizedBox(width: 200, child: configProvider.configModel!.shippingMethod =='sellerwise_shipping' &&
                                           sellerGroupList[index].shippingType == 'order_wise' && hasPhysical ?
+
+
+
+
+
 
                                       Padding(padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
                                         child: InkWell(onTap: () {
@@ -515,11 +523,16 @@ class CartScreenState extends State<CartScreen> {
                                     ),
                                   ) : const SizedBox(),
 
+
+
+
                                   if(sellerGroupList[index].minimumOrderAmountInfo!> totalCost)
                                   Padding(padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeSmall),
                                     child: Text('${getTranslated('minimum_order_amount_is', context)} '
                                         '${PriceConverter.convertPrice(context, sellerGroupList[index].minimumOrderAmountInfo)}',
                                       style: textRegular.copyWith(color: Theme.of(context).colorScheme.error),),),
+
+
 
                                   if(configProvider.configModel!.shippingMethod == 'sellerwise_shipping' && sellerGroupList[index].shippingType == 'order_wise' && hasPhysical)
                                     Padding(padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
@@ -582,10 +595,45 @@ class CartScreenState extends State<CartScreen> {
                                         );
                                         },
                                       ),
+
+
+                                     // Text("555"),
+
+
                                     ],
                                     )),
                                   ),
-                                    if(sellerGroupList[index].freeDeliveryOrderAmount?.status == 1 && hasPhysical && sellerGroupList[index].isGroupItemChecked!)
+                                  SizedBox(height: 10,),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.yellow[100],
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.amber.shade700, width: 1.5),
+                                    ),
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Icon(Icons.warning_amber_rounded, color: Colors.amber[800]),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            'Disclaimer: Product weight and size may slightly vary due to manufacturing and polishing processes.',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[800],
+                                              fontWeight: FontWeight.w500,
+                                              height: 1.4,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+
+
+                                  if(sellerGroupList[index].freeDeliveryOrderAmount?.status == 1 && hasPhysical && sellerGroupList[index].isGroupItemChecked!)
                                     Padding(padding: const EdgeInsets.only(bottom : Dimensions.paddingSizeSmall,left: Dimensions.paddingSizeDefault,
                                         right: Dimensions.paddingSizeDefault, top: Dimensions.paddingSizeSmall),
                                       child: Row(children: [

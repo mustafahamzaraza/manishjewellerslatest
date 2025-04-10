@@ -185,7 +185,7 @@ class DashBoardScreenState extends State<DashBoardScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => NotificationScreen()),
+                    MaterialPageRoute(builder: (context) => NotificationScreenInvest()),
                   );
 
                   // Handle notification icon press

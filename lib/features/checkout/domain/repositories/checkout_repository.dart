@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_sixvalley_ecommerce/data/datasource/remote/dio/dio_client.dart';
 import 'package:flutter_sixvalley_ecommerce/data/datasource/remote/exception/api_error_handler.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_sixvalley_ecommerce/features/checkout/domain/repositorie
 import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
+import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
 import 'dart:async';
 import 'package:provider/provider.dart';
 
@@ -27,6 +29,17 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
     }
   }
 
+
+  // void initPhonePeSdk(String environmentValue, String merchantId, String flowId, bool enableLogs) {
+  //   PhonePePaymentSdk.init(environmentValue, merchantId, flowId, enableLogs)
+  //       .then((isInitialized) {
+  //     print("PhonePe SDK Initialized: $isInitialized");
+  //     // You can update UI or state here
+  //   }).catchError((error) {
+  //     print("Error in initializing PhonePe SDK: $error");
+  //     // Handle the error accordingly
+  //   });
+  // }
 
   @override
   Future<ApiResponse> offlinePaymentPlaceOrder(String? addressID, String? couponCode, String? couponDiscountAmount, String? billingAddressId, String? orderNote, List <String?> typeKey, List<String> typeValue, int? id, String name, String? paymentNote, bool? isCheckCreateAccount, String? password) async {
@@ -55,6 +68,14 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
         'is_check_create_account' : isCheckAccount.toString(),
         'password' : password ?? '',
       });
+
+      // 👇 Debug log for the outgoing request
+      print("🔼 Sending offline payment request to: ${AppConstants.offlinePayment}");
+      print("🧾 Payload:");
+      fields.forEach((key, value) {
+        print("  $key: $value");
+      });
+
       Response response = await dioClient!.post(AppConstants.offlinePayment, data: fields);
       return ApiResponse.withSuccess(response);
     } catch (e) {
@@ -64,9 +85,11 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
 
 
   @override
-  Future<ApiResponse> walletPaymentPlaceOrder(String? addressID, String? couponCode,String? couponDiscountAmount, String? billingAddressId, String? orderNote, bool? isCheckCreateAccount, String? password) async {
+  Future<ApiResponse> walletPaymentPlaceOrder(
+      String? addressID, String? couponCode,String? couponDiscountAmount, String? billingAddressId, String? orderNote, bool? isCheckCreateAccount, String? password) async {
     int isCheckAccount = isCheckCreateAccount! ? 1: 0;
     try {
+
       final response = await dioClient!.get(
         '${AppConstants.walletPayment}'
             '?address_id=$addressID'
@@ -129,8 +152,8 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
       };
 
 
-      // Print the request payload
-      print("Request Payload: $data");
+
+      print("Request Payload Online: $data");
 
       final response = await dioClient!.post(
           AppConstants.digitalPayment, data: {
@@ -150,7 +173,21 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
         'password' : password,
       });
 
-      print("Response: ${response.data}");
+      print("Payment Response Digital : ${response.data}");
+      //
+      // String merchantOrderId = response.data['merchantOrderId'];
+      // String orderId = response.data['order_id'];
+      // String token = response.data['token'];
+      //
+      //
+      // print("Merchant ID: $merchantOrderId");
+      // print("Order ID: $orderId");
+      // print("Token: $token");
+
+      // Now start the PhonePe transaction using the extracted IDs
+      // startPhonePeTransaction(orderId, merchantOrderId, token);
+
+
 
       return ApiResponse.withSuccess(response);
 
@@ -190,4 +227,49 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
     // TODO: implement update
     throw UnimplementedError();
   }
+
+
+  // Function to start PhonePe payment transaction
+  // void startPhonePeTransaction(String orderId, String merchantOrderId, String token) {
+  //   try {
+  //     Map<String, dynamic> payload = {
+  //       "orderId": orderId,
+  //       "merchantId": merchantOrderId,
+  //       "token": token,
+  //       "paymentMode": {"type": "PAY_PAGE"}
+  //     };
+  //
+  //     String request = jsonEncode(payload);
+  //     print("Payment Request: $request");
+  //
+  //     PhonePePaymentSdk.startTransaction(request, "appSchema") // replace with actual schema
+  //         .then((response) {
+  //       if (response != null) {
+  //         String status = response['status'].toString();
+  //         String error = response['error'].toString();
+  //         if (status == 'SUCCESS') {
+  //           print("Flow Completed - Status: Success!");
+  //           // Navigate to payment status page or handle success
+  //         } else {
+  //           print("Flow Completed - Status: $status and Error: $error");
+  //           // Navigate to payment status page or handle error
+  //         }
+  //       } else {
+  //         print("Flow Incomplete");
+  //         // Handle incomplete flow
+  //       }
+  //     }).catchError((error) {
+  //       print("Error in transaction: $error");
+  //       // Handle error
+  //     });
+  //   } catch (error) {
+  //     print("Error: $error");
+  //     // Handle error
+  //   }
+  // }
+
+
+
+
+
 }

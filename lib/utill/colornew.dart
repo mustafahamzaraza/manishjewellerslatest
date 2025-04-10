@@ -34,6 +34,7 @@ class AppColors {
   static const Color lightGold5 = Color(0xFFFFF4CC);
 
 
+  static const Color darkblue = Color(0xFF000435);
   static const Color yellowAccentGold = Color(0xFFFFE066); // Soft yellow-gold accent
   static const Color richYellowGold = Color(0xFFFFD54F);  // Rich yellow-gold
   static const Color glowingGold = Color(0xFFFFEE58);     // Vibrant glowing gold

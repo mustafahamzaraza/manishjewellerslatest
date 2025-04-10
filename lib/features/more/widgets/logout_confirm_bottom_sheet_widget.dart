@@ -8,6 +8,7 @@ import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_button_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LogoutCustomBottomSheetWidget extends StatelessWidget {
   const LogoutCustomBottomSheetWidget({super.key});
@@ -41,7 +42,7 @@ class LogoutCustomBottomSheetWidget extends StatelessWidget {
 
             const SizedBox(width: Dimensions.paddingSizeDefault,),
             Expanded(child: SizedBox(width: 120,child: CustomButton(buttonText: '${getTranslated('sign_out', context)}',
-                onTap: (){
+                onTap: () async{
               Provider.of<AuthController>(context, listen: false).logOut().then((condition) {
                 Navigator.pop(context);
                 Provider.of<AuthController>(context,listen: false).clearSharedData();
@@ -50,7 +51,12 @@ class LogoutCustomBottomSheetWidget extends StatelessWidget {
                 // Provider.of<AddressController>(context, listen: false).getAddressList();
                 Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginScreen(fromLogout: true)), (route) => false);
               });
-            })))]))
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.remove('auth_token');
+            }
+
+
+            )))]))
 
       ],),
     );

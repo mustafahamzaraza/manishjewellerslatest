@@ -26,42 +26,121 @@ class ReviewRepository implements ReviewRepositoryInterface{
     }
   }
 
-  @override
-  Future<http.StreamedResponse> submitReview(ReviewBody reviewBody, List<File> files,  bool update) async {
-    http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse(update?'${AppConstants.baseUrl}${AppConstants.updateOrderWiseReview}':'${AppConstants.baseUrl}${AppConstants.submitReviewUri}'));
-    request.headers.addAll(<String,String>{'Authorization': 'Bearer ${Provider.of<AuthController>(Get.context!, listen: false).getUserToken()}'});
-    for(int index=0; index <files.length ; index++) {
-      if(files[index].path.isNotEmpty) {
-        request.files.add(http.MultipartFile(
-          'fileUpload[$index]',
-          files[index].readAsBytes().asStream(),
-          files[index].lengthSync(),
-          filename: files[index].path.split('/').last,
-        ));
-      }
-    }
-    if(update){
-      request.fields.addAll(<String, String>{
-        "id" : reviewBody.id!,
-        "order_id" : reviewBody.orderId!,
-        'product_id': reviewBody.productId!,
-        'comment': reviewBody.comment!,
-        '_method' : "put",
-        'rating': reviewBody.rating!});
-    }else{
-      log("----repo===>${reviewBody.orderId}");
-      request.fields.addAll(<String, String>{
-        "order_id" : reviewBody.orderId?? "100264",
-        'product_id': reviewBody.productId!,
-        'comment': reviewBody.comment!,
-        'rating': reviewBody.rating!});
-    }
 
-    log("Here is Body==> ${request.fields.toString()}===>");
-    http.StreamedResponse response = await request.send();
-    log("Here is Body==> ${request.fields.toString()}===> ${response.statusCode}/${response.stream.asBroadcastStream()}");
-    return response;
+  @override
+  Future<http.StreamedResponse> submitReview(
+      ReviewBody reviewBody,
+      List<File> files,
+      bool update,
+      ) async {
+    try {
+      // final uri = Uri.parse(
+      //   update
+      //       ? '${AppConstants.baseUrl}${AppConstants.updateOrderWiseReview}'
+      //       : '${AppConstants.baseUrl}${AppConstants.submitReviewUri}',
+      // );
+
+
+      final uri = Uri.parse(
+        update
+            ? 'https://manish-jewellers.com/api/v1/products/review/update'
+            : 'https://manish-jewellers.com/api/v1/products/reviews/submit',
+      );
+
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add Authorization Header
+      final userToken = Provider.of<AuthController>(Get.context!, listen: false).getUserToken();
+      request.headers.addAll({
+        'Authorization': 'Bearer $userToken',
+      });
+
+      // Attach files
+      for (int i = 0; i < files.length; i++) {
+        final file = files[i];
+        if (file.path.isNotEmpty) {
+          request.files.add(
+            http.MultipartFile(
+              'fileUpload[$i]',
+              file.readAsBytes().asStream(),
+              file.lengthSync(),
+              filename: file.path.split('/').last,
+            ),
+          );
+        }
+      }
+
+      // Prepare fields
+      final fields = <String, String>{
+        "order_id": reviewBody.orderId ?? "100264",
+        "product_id": reviewBody.productId ?? "",
+        "comment": reviewBody.comment ?? "",
+        "rating": reviewBody.rating ?? "0",
+      };
+
+      if (update) {
+        fields["id"] = reviewBody.id ?? "";
+        fields["_method"] = "put";
+      }
+
+      request.fields.addAll(fields);
+
+      log("🔍 Review Submit Body: ${request.fields}");
+      final response = await request.send();
+      log("✅ Review Submitted: Status ${response.statusCode} response ${response.toString()}");
+      final responseBody = await response.stream.bytesToString();
+      log("Status Code: ${response.statusCode}");
+      log("Response Body: $responseBody");
+      return response;
+    } catch (e) {
+      log("❌ Error in submitReview: $e");
+      rethrow;
+    }
   }
+
+
+  // @override
+  // Future<http.StreamedResponse> submitReview(ReviewBody reviewBody, List<File> files,  bool update) async {
+  //   // http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse(update?'${AppConstants.baseUrl}${AppConstants.updateOrderWiseReview}':'${AppConstants.baseUrl}${AppConstants.submitReviewUri}'));
+  //   http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse(update?'${AppConstants.baseUrl}${AppConstants.updateOrderWiseReview}':'${AppConstants.baseUrl}${AppConstants.submitReviewUri}'));
+  //   request.headers.addAll(<String,String>{'Authorization': 'Bearer ${Provider.of<AuthController>(Get.context!, listen: false).getUserToken()}'});
+  //   for(int index=0; index <files.length ; index++) {
+  //     if(files[index].path.isNotEmpty) {
+  //       request.files.add(http.MultipartFile(
+  //         'fileUpload[$index]',
+  //         files[index].readAsBytes().asStream(),
+  //         files[index].lengthSync(),
+  //         filename: files[index].path.split('/').last,
+  //       ));
+  //     }
+  //   }
+  //   if(update){
+  //     request.fields.addAll(<String, String>{
+  //       "id" : reviewBody.id!,
+  //       "order_id" : reviewBody.orderId!,
+  //       "product_id": reviewBody.productId!,
+  //       "comment": reviewBody.comment!,
+  //       "_method" : "put",
+  //       "rating": reviewBody.rating!}
+  //     );
+  //   }
+  //   else{
+  //     log("Review response orderid ${reviewBody.orderId}");
+  //     request.fields.addAll(<String, String>{
+  //       "order_id" : reviewBody.orderId?? "100264",
+  //       "product_id": reviewBody.productId!,
+  //       "comment": reviewBody.comment!,
+  //       "rating": reviewBody.rating!
+  //     });
+  //   }
+  //
+  //   log("Review : Here is Body==> ${request.fields.toString()}");
+  //   http.StreamedResponse response = await request.send();
+  //
+  //
+  //   log("After Review: Here is Body = ${request.fields.toString()} / ${response.statusCode}/${response.stream.asBroadcastStream()}");
+  //   return response;
+  // }
 
 
 
