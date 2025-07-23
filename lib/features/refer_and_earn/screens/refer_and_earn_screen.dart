@@ -99,7 +99,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(mainAxisAlignment: MainAxisAlignment.center,
                       children: shareItem.map((item) => GestureDetector(
-                        onTap: () => Share.share('Greetings, ${AppConstants.appName} is the best e-commerce platform in the country. If you are new to this website don’t forget to use "${Provider.of<ProfileController>(context, listen: false).userInfoModel?.referCode??''}" as the referral code while sign up into  ${AppConstants.appName}. ${'${Provider.of<SplashController>(context, listen: false).configModel?.refSignup}${Provider.of<ProfileController>(context, listen: false).userInfoModel?.referCode??''}'}',),
+                        onTap: () => Share.share('Greetings, ${AppConstants.appName} is the best jewellery store in the country. If you are new to this website don’t forget to use "${Provider.of<ProfileController>(context, listen: false).userInfoModel?.referCode??''}" as the referral code while sign up into  ${AppConstants.appName}. ${'${Provider.of<SplashController>(context, listen: false).configModel?.refSignup}${Provider.of<ProfileController>(context, listen: false).userInfoModel?.referCode??''}'}',),
                         child: Container(margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
                           child: Image.asset(item, height: 45, width: 45),),
                       )).toList()))])),

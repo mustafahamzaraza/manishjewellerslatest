@@ -40,6 +40,7 @@ import '../../../manishecommerceinvestment/ledger.dart';
 import '../../../manishecommerceinvestment/notification.dart';
 import '../../../utill/colornew.dart';
 import '../../gold/paymentlistscreen.dart';
+import '../../loyaltyPoint/screens/loyalty_point_screen.dart';
 import 'faq_screen_view.dart';
 import 'package:flutter_sixvalley_ecommerce/features/more/widgets/title_button_widget.dart';
 
@@ -151,12 +152,17 @@ class _MoreScreenState extends State<MoreScreen> {
                         MenuButtonWidget(image: Images.bgLatest, title: 'Check Gold Rates',
                             navigateTo: GoldPriceScreenT()),
 
+                        //if(!isGuestMode)
+                          //if(configModel!.refEarningStatus != null && configModel.refEarningStatus == "1")
+
                         if(!isGuestMode)
-                          if(configModel!.refEarningStatus != null && configModel.refEarningStatus == "1")
                           MenuButtonWidget(image: Images.refIcon, title: getTranslated('refer_and_earn', context),
-                              isProfile: true,
+                             // isProfile: true,
                               navigateTo: const ReferAndEarnScreen()),
 
+
+                        MenuButtonWidget(image: Images.bgLatest, title: 'Loyalty Points',
+                            navigateTo: LoyaltyPointScreen()),
 
                         MenuButtonWidget(image: Images.category, title: getTranslated('CATEGORY', context),
                             navigateTo: const CategoryScreen()),

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -58,6 +59,15 @@ class ProductDetailsController extends ChangeNotifier {
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _isDetails = false;
       _productDetailsModel = ProductDetailsModel.fromJson(apiResponse.response!.data);
+
+      // 🔍 Print full response
+      print('✅ Status Code: ${apiResponse.response!.statusCode}');
+      print('🟢 Status Message: ${apiResponse.response!.statusMessage}');
+      print('📄 Headers: ${apiResponse.response!.headers}');
+      print('📦 Full Data (Raw): ${jsonEncode(apiResponse.response!.data)}');
+
+    //  print('✅ Status Code: ${apiResponse.response!.statusCode}');
+    //  print('🟢 Raw Response Data: ${jsonEncode(apiResponse.response!.data)}');
     } else {
       _isDetails = false;
       showCustomSnackBar(apiResponse.error.toString(), context);

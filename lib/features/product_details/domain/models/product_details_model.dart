@@ -32,6 +32,7 @@ class ProductDetailsModel {
   List<Variation>? _variation;
   int? _published;
   double? _unitPrice;
+  int? _hallmarkCharges;
   double? _purchasePrice;
   double? _tax;
   String? _taxModel;
@@ -54,6 +55,8 @@ class ProductDetailsModel {
   double? _shippingCost;
   int? _multiplyQty;
   String? _code;
+  int? _makingCharges;
+  String? _metal;
   int? _reviewsCount;
   String? _averageReview;
   List<Reviews>? _reviews;
@@ -100,6 +103,7 @@ class ProductDetailsModel {
         List<Variation>? variation,
         int? published,
         double? unitPrice,
+        int? hallmarkCharges,
         double? purchasePrice,
         double? tax,
         String? taxModel,
@@ -122,6 +126,8 @@ class ProductDetailsModel {
         double? shippingCost,
         int? multiplyQty,
         String? code,
+        int? makingCharges,
+        String? metal,
         int? reviewsCount,
         String? averageReview,
         List<Reviews>? reviews,
@@ -223,6 +229,9 @@ class ProductDetailsModel {
     if (unitPrice != null) {
       _unitPrice = unitPrice;
     }
+     if (hallmarkCharges != null) {
+       _hallmarkCharges = hallmarkCharges;
+     }
     if (purchasePrice != null) {
       _purchasePrice = purchasePrice;
     }
@@ -289,6 +298,12 @@ class ProductDetailsModel {
     }
     if (code != null) {
       _code = code;
+    }
+    if (makingCharges != null) {
+      _makingCharges = makingCharges;
+    }
+    if (metal != null) {
+      _metal = metal;
     }
     if (reviewsCount != null) {
       _reviewsCount = reviewsCount;
@@ -362,6 +377,7 @@ class ProductDetailsModel {
   List<Variation>? get variation => _variation;
   int? get published => _published;
   double? get unitPrice => _unitPrice;
+  int? get hallmarkCharges => _hallmarkCharges;
   double? get purchasePrice => _purchasePrice;
   double? get tax => _tax;
   String? get taxModel => _taxModel;
@@ -384,6 +400,8 @@ class ProductDetailsModel {
   double? get shippingCost => _shippingCost;
   int? get multiplyQty => _multiplyQty;
   String? get code => _code;
+  int? get makingCharges => _makingCharges;
+  String? get metal => _metal;
   int? get reviewsCount => _reviewsCount;
   String? get averageReview => _averageReview;
   List<Reviews>? get reviews => _reviews;
@@ -483,6 +501,7 @@ class ProductDetailsModel {
 
     _published = json['published'];
     _unitPrice = json['unit_price'].toDouble();
+    _hallmarkCharges = double.tryParse(json['hallmark_charges'].toString())?.toInt() ?? 0;
     _purchasePrice = json['purchase_price'].toDouble();
     _tax = json['tax'].toDouble();
     _taxModel = json['tax_model'];
@@ -510,6 +529,10 @@ class ProductDetailsModel {
     _shippingCost = json['shipping_cost'].toDouble();
     _multiplyQty = json['multiply_qty'];
     _code = json['code'];
+    _makingCharges = double.tryParse(json['making_charges'].toString())?.toInt() ?? 0;
+
+    _metal = json['product_metal'];
+
     if(json['reviews_count'] != null){
       _reviewsCount = int.parse(json['reviews_count'].toString());
     }else{

@@ -243,6 +243,8 @@ class _ProductDetailsState extends State<ProductDetails> {
                     ),
 
 
+                  //  Text("Making charges ${details.productDetailsModel?.makingCharges} Hallmark charges ${details.productDetailsModel?.hallmarkCharges}"),
+
 
 
                     (details.productDetailsModel?.productType == 'digital' && (_publishingHouse.isNotEmpty || _authors.isNotEmpty)) ?
