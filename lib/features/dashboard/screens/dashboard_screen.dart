@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter_sixvalley_ecommerce/features/notification/screens/notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/screens/cart_screen.dart';
@@ -185,7 +185,7 @@ class DashBoardScreenState extends State<DashBoardScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => NotificationScreenInvest()),
+                    MaterialPageRoute(builder: (context) => NotificationScreen()),
                   );
 
                   // Handle notification icon press

@@ -209,7 +209,7 @@ class ProductTitleWidget extends StatelessWidget {
     int? makingCharges = productModel!.makingCharges!;
     int? hallmarkCharges = productModel!.hallmarkCharges!;
     double? tax = productModel!.tax!;
-    double? startingUP = pricenew - makingCharges.toDouble() - hallmarkCharges.toDouble() - tax;
+    double? startingUP = pricenew - makingCharges.toDouble() - hallmarkCharges.toDouble() - ((tax/100)*pricenew);
 
     int? initPrice = startingUP.toInt();
 
@@ -393,7 +393,7 @@ class ProductTitleWidget extends StatelessWidget {
                   buildPriceRow("Making Charges", "", "₹${makingCharges.toString()}"),
      //             buildPriceRow("Other Charges", "", "₹300"),
                   buildPriceRow("Hallmark Charges", "", "₹${hallmarkCharges.toString()}"),
-                  buildPriceRow("GST", "", "₹${tax.toString()}", isHighlighted: true),
+                  buildPriceRow("GST", "", "${tax.toStringAsFixed(0)}%", isHighlighted: true),
                   const Divider(),
                   buildPriceRow("Total", "", "₹$pricenew", isBold: true),
                 ],

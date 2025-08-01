@@ -410,7 +410,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> with WidgetsBinding
      _deductedAmountController.add(effectiveAmount);
 
      double goldPrice = double.tryParse(price22k.replaceAll(RegExp('[^0-9.]'), '')) ?? 0.0;
-     goldAcquired = effectiveAmount / goldPrice;
+     goldAcquired = effectiveAmount / (goldPrice/10);
      _goldWeightController.add(goldAcquired);
 
      print("✅ Payment: $selectedPaymentMethod | Entered: $enteredAmount | Effective: $effectiveAmount | Gold: $goldAcquired");
@@ -586,7 +586,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> with WidgetsBinding
                      initialData: 0.0,
                      builder: (context, snapshot) {
                        return Text(
-                         "Gold Acquired: ${snapshot.data!.toStringAsFixed(4)} grams",
+                         "Gold Acquired: ${(snapshot.data! * 10).toStringAsFixed(4)}grams",
                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                        );
                      },
@@ -610,7 +610,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> with WidgetsBinding
                      initialData: 0.0,
                      builder: (context, snapshot) {
                        return Text(
-                         "Gold Acquired: ${snapshot.data!.toStringAsFixed(4)} grams",
+                         "Gold Acquired: ${(snapshot.data! * 10).toStringAsFixed(4)} grams",
                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
                        );
                      },
@@ -706,7 +706,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> with WidgetsBinding
                                      },
                                      planName: planName.toString(),
                                      planCat: planCat.toString(),
-                                     goldAcquired: goldAcquired.toString(),
+                                  //   goldAcquired: goldAcquired.toString(),
                                      installid: 0,
                                    );
                                  },
@@ -1271,14 +1271,14 @@ class DailySavingsDialog extends StatefulWidget {
   final Function(double, double) onSetupSavings;
   final String planName;
   final String planCat;
-  final String goldAcquired;
+  //final String goldAcquired;
   final int installid;
 
   DailySavingsDialog({
     required this.onSetupSavings,
     required this.planName,
     required this.planCat,
-    required this.goldAcquired,
+    //required this.goldAcquired,
     required this.installid
   });
 
@@ -1306,6 +1306,7 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _amountController.text = selectedAmount.toString();
+    fetchGoldPrices();
   }
 
   @override
@@ -1377,7 +1378,9 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
     }
   }
 
-  Future<void> createMandate(double amount, String frequency , int ipid) async {
+
+
+  Future<void> createMandate(double amount, String frequency , int ipid, double goldAcquired) async {
     String? token = await getToken();
     final url =
     Uri.parse('https://manish-jewellers.com/api/v1/mandate/create');
@@ -1399,12 +1402,12 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
       'plan_code': widget.planCat,
       'plan_category': widget.planName,
       'total_yearly_payment': '0',
-      'total_gold_purchase': widget.goldAcquired,
+      'total_gold_purchase': goldAcquired.toString(),
       'start_date': getCurrentDate(),
       "details": [
         {
           "monthly_payment": amount,
-          "purchase_gold_weight": widget.goldAcquired
+          "purchase_gold_weight": goldAcquired.toString()
         }
       ],
       "no_of_months": GlobalPlan().months.toString()
@@ -1420,12 +1423,13 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
 
         print("Intent URL: $intentUrl");
         print("Mandate ID: $mandateId");
-
+        print("Auto Pay Gold: $goldAcquired");
         _mandateId = mandateId;
         _lastMandateId = mandateId;
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('mandate', _mandateId ?? 'null');
+
 
         //await Future.delayed(Duration(seconds: 3));
 
@@ -1440,7 +1444,40 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
   }
   int currentIndex = 0;
 
+  double goldPricePerGram = 0.0;
+  String price22k = "Loading...";
 
+  Future<void> fetchGoldPrices() async {
+    const String apiUrl = "https://manish-jewellers.com/api/v1/goldPriceService";
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        String dateTime = DateFormat("dd/MM/yyyy, hh:mm a").format(DateTime.now());
+
+        print('response $data');
+        setState(() {
+
+          goldPricePerGram = double.tryParse(data['data']['price_gram']['22k_gst_included'].toString()) ?? 0.0;
+          price22k = "${goldPricePerGram.toStringAsFixed(2)}";
+
+        });
+        print('22k wala $price22k');
+
+      } else {
+        setState(() {
+
+        });
+      }
+    } catch (e) {
+      setState(() {
+
+      });
+    }
+  }
+
+  bool _isLoading = false;
 
 
   @override
@@ -1472,7 +1509,7 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                 ),
               ),
               SizedBox(height: 20),
-          
+
               // White card
               Container(
                 width: double.infinity,
@@ -1512,7 +1549,7 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                       ],
                     ),
                     SizedBox(height: 16),
-          
+
                     // Frequency Chips
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -1540,14 +1577,14 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                         }).toList(),
                       ),
                     ),
-          
-          
+
+
                   ],
                 ),
               ),
-          
+
               SizedBox(height: 10),
-          
+
              // Promo Card
               Container(
                 width: double.infinity,
@@ -1576,7 +1613,7 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                         }),
                       ),
                     ),
-          
+
                     Row(
                       children: [
                         Icon(Icons.whatshot, color: Colors.blue, size: 20),
@@ -1585,10 +1622,10 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                       ],
                     ),
                     Row(
-          
+
                       children: [
-          
-          
+
+
                         Expanded(
                           child: Text(
                             "User’s consistent savings helped them own pure gold today!",
@@ -1599,13 +1636,13 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                         Image.asset("assets/images/user.png", height: 50,color: Colors.blue,),
                       ],
                     ),
-          
+
                   ],
                 )
               ),
-          
+
               SizedBox(height: 20),
-          
+
               // Amount Selection
               Align(
                 alignment: Alignment.centerLeft,
@@ -1636,7 +1673,7 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                   );
                 }).toList(),
               ),
-          
+
               SizedBox(height: 20),
 
               TextField(
@@ -1657,12 +1694,7 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                   setState(() {
                     selectedAmount = null; // Clear chip when typing
                   });
-                  // double enteredAmt = double.tryParse(val) ?? 0;
-                  // if (enteredAmt >= 50) {
-                  //   setState(() {
-                  //     selectedAmount = 0; // Unselect chip if manual amount is entered
-                  //   });
-                  // }
+
                 },
               ),
 
@@ -1677,7 +1709,10 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                         ? selectedAmount!.toDouble()
                         : double.tryParse(_amountController.text.trim()) ?? 0.0;
 
-                    double goldAcquired = amount / 6000;
+
+                    double goldPrice = double.tryParse(price22k.replaceAll(RegExp('[^0-9.]'), '')) ?? 0.0;
+
+                    double goldAcquired = amount / (goldPrice/10);
 
                     bool isValidAmount = false;
 
@@ -1747,7 +1782,7 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                                         icon: Icon(Icons.check, color: Colors.white),
                                         label: Text("Confirm", style: TextStyle(color: Colors.white)),
                                         onPressed: () {
-                                          createMandate(amount, selectedFrequency, widget.installid);
+                                          createMandate(amount, selectedFrequency, widget.installid,goldAcquired);
                                         },
                                       ),
                                     ],
@@ -1772,135 +1807,9 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
 
 
 
-                  // onPressed: () {
-                  //
-                  //
-                  //   // double amount = selectedAmount != null
-                  //   //     ? selectedAmount!.toDouble()
-                  //   //     : double.tryParse(_amountController.text) ?? 0.0;
-                  //   //
-                  //   // double goldAcquired = amount / 6000;
-                  //   //
-                  //   //
-                  //   // double amountsel = selectedAmount != null
-                  //   //     ? selectedAmount!.toDouble()
-                  //   //     : double.tryParse(_amountController.text) ?? 0.0;
-                  //   //
-                  //
-                  //   double amount = selectedAmount != null && selectedAmount! > 0
-                  //       ? selectedAmount!.toDouble()
-                  //       : double.tryParse(_amountController.text.trim()) ?? 0.0;
-                  //
-                  //   double goldAcquired = amount / 6000;
-                  //
-                  //
-                  //
-                  //   if (amount >= 1) {
-                  //
-                  //     Navigator.pop(context);
-                  //     Future.delayed(Duration(milliseconds: 300), () {
-                  //       widget.onSetupSavings(amount, goldAcquired);
-                  //     });
-                  //
-                  //     showDialog(
-                  //       context: context,
-                  //       builder: (BuildContext context) {
-                  //         return Dialog(
-                  //           shape: RoundedRectangleBorder(
-                  //               borderRadius: BorderRadius.circular(20)),
-                  //           backgroundColor: Colors.white,
-                  //           child: Padding(
-                  //             padding: const EdgeInsets.all(20.0),
-                  //             child: Column(
-                  //               mainAxisSize: MainAxisSize.min,
-                  //               children: [
-                  //                 Icon(Icons.check_circle,
-                  //                     color: Colors.green, size: 60),
-                  //                 SizedBox(height: 15),
-                  //                 Text("Savings Set!",
-                  //                     style: TextStyle(
-                  //                         fontSize: 20,
-                  //                         fontWeight: FontWeight.bold)),
-                  //                 SizedBox(height: 10),
-                  //                 Text(
-                  //                     "You've scheduled $selectedFrequency savings of",
-                  //                     style: TextStyle(fontSize: 16),
-                  //                     textAlign: TextAlign.center),
-                  //                 SizedBox(height: 8),
-                  //                 Text(
-                  //                     "₹${amount.toStringAsFixed(0)} per $selectedFrequency",
-                  //                     style: TextStyle(
-                  //                         fontSize: 22,
-                  //                         fontWeight: FontWeight.bold,
-                  //                         color: Colors.purple)),
-                  //                 SizedBox(height: 8),
-                  //                 Text(
-                  //                     "~${goldAcquired.toStringAsFixed(2)}g of 24K Gold/$selectedFrequency",
-                  //                     style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         color: Colors.amber[800])),
-                  //                 SizedBox(height: 20),
-                  //                 Row(
-                  //                   mainAxisAlignment: MainAxisAlignment.center,
-                  //                   children: [
-                  //                     Image.asset("assets/images/phonepe.png",
-                  //                         height: 60),
-                  //                   ],
-                  //                 ),
-                  //                 SizedBox(height: 25),
-                  //                 Row(
-                  //                   mainAxisAlignment:
-                  //                   MainAxisAlignment.spaceEvenly,
-                  //                   children: [
-                  //                     OutlinedButton.icon(
-                  //                       style: OutlinedButton.styleFrom(
-                  //                         side: BorderSide(color: Colors.red),
-                  //                         shape: RoundedRectangleBorder(
-                  //                             borderRadius:
-                  //                             BorderRadius.circular(10)),
-                  //                       ),
-                  //                       icon:
-                  //                       Icon(Icons.close, color: Colors.red),
-                  //                       label: Text("Close",
-                  //                           style: TextStyle(color: Colors.red)),
-                  //                       onPressed: () {
-                  //                         Navigator.pop(context);
-                  //                       },
-                  //                     ),
-                  //                     ElevatedButton.icon(
-                  //                       style: ElevatedButton.styleFrom(
-                  //                         backgroundColor: Colors.purple,
-                  //                         shape: RoundedRectangleBorder(
-                  //                             borderRadius:
-                  //                             BorderRadius.circular(10)),
-                  //                         padding: EdgeInsets.symmetric(
-                  //                             horizontal: 20, vertical: 12),
-                  //                       ),
-                  //                       icon: Icon(Icons.check,
-                  //                           color: Colors.white),
-                  //                       label: Text("Confirm",
-                  //                           style:
-                  //                           TextStyle(color: Colors.white)),
-                  //                       onPressed: () {
-                  //                         createMandate(
-                  //                             amount, selectedFrequency, widget.installid);
-                  //                       },
-                  //                     ),
-                  //                   ],
-                  //                 ),
-                  //               ],
-                  //             ),
-                  //           ),
-                  //         );
-                  //       },
-                  //     );
-                  //   } else {
-                  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  //       content:
-                  //       Text("Please enter a valid amount (min ₹50)"),
-                  //     ));
-                  //   }
-                  // },
+
+
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 14),

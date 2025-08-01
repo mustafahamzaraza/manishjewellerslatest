@@ -121,6 +121,11 @@ class _MoreScreenState extends State<MoreScreen> {
                       child: Column(children: [
 
 
+                        MenuButtonWidget(image: Images.notification, title: getTranslated('notification', context,),
+                            isNotification: true,
+                            navigateTo: const NotificationScreen()),
+
+
                         MenuButtonWidget(image: Images.trackOrderIcon, title: getTranslated('TRACK_ORDER', context),
                             navigateTo: const GuestTrackOrderScreen()),
 
@@ -175,9 +180,7 @@ class _MoreScreenState extends State<MoreScreen> {
                           MenuButtonWidget(image: Images.compare, title: getTranslated('compare_products', context),
                               navigateTo: const CompareProductScreen()),
 
-                        MenuButtonWidget(image: Images.notification, title: getTranslated('notification', context,),
-                            isNotification: true,
-                            navigateTo: const NotificationScreen()),
+
 
 
                         MenuButtonWidget(image: Images.notification, title: 'Investment Notification',

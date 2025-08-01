@@ -432,7 +432,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
 
     //  double goldPrice = (double.tryParse(price22k.replaceAll(RegExp('[^0-9.]'), '')) ?? 0.0) / 10;
 
-      goldAcquired = effectiveAmount / goldPrice;
+      goldAcquired = effectiveAmount / (goldPrice/10);
       _goldWeightController.add(goldAcquired);
 
       print("✅ Payment: $selectedPaymentMethod | Entered: $enteredAmount | Effective: $effectiveAmount | Gold: $goldAcquired");
@@ -857,7 +857,6 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                         },
                         planName: planName.toString(),
                         planCat: planCode.toString(),
-                        goldAcquired: goldAcquired.toString(),
                         installid: planpId ?? 0,
                       );
                     print('planName $planName planCode $planCode');
@@ -1057,7 +1056,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                       initialData: 0.0,
                       builder: (context, snapshot) {
                         return Text(
-                          "Gold Acquired: ${snapshot.data!.toStringAsFixed(4)} grams",
+                          "Gold Acquired: ${(snapshot.data! * 10).toStringAsFixed(4)} grams",
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         );
                       },
@@ -1103,7 +1102,7 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                       initialData: 0.0,
                       builder: (context, snapshot) {
                         return Text(
-                          "Gold Acquired: ${snapshot.data!.toStringAsFixed(4)} grams",
+                          "Gold Acquired: ${(snapshot.data! * 10).toStringAsFixed(4)} grams",
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
                        );
                      },
@@ -1173,7 +1172,6 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
                                       },
                                       planName: planName.toString(),
                                       planCat: planCode.toString(),
-                                      goldAcquired: goldAcquired.toString(),
                                       installid: planpId ?? 0,
                                     );
                                   },
