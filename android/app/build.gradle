@@ -30,7 +30,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.banana.com"
-    compileSdk flutter.compileSdkVersion
+    compileSdk 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -51,8 +51,8 @@ android {
    //     applicationId "com.altaibagold.ordernow"
         applicationId = "com.banana.com"
         minSdkVersion 23
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode 53
+        targetSdkVersion 34
+        versionCode 54
         versionName flutterVersionName
         multiDexEnabled true //new
     }

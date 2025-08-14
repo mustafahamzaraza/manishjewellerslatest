@@ -1772,6 +1772,9 @@ class _DailySavingsDialogState extends State<DailySavingsDialog> with WidgetsBin
                                           Navigator.pop(context);
                                         },
                                       ),
+
+
+
                                       ElevatedButton.icon(
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.purple,

@@ -373,6 +373,25 @@ class ProductTitleWidget extends StatelessWidget {
                   Text("Price Breakup", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   const SizedBox(height: 12),
                   //buildPriceRow("92300/-\nRate/10gms", weight, "₹${initPrice.toString()}"),
+
+
+                  if(carat == "24")
+                    FutureBuilder<double?>(
+                      future: GoldPriceService.fetch24kPrice(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Text("Loading...", style: TextStyle(fontSize: 14));
+                        } else if (snapshot.hasError || snapshot.data == null) {
+                          return const Text("Rate Error", style: TextStyle(fontSize: 14, color: Colors.red));
+                        } else {
+                          double price24k = snapshot.data!;
+                          return buildPriceRow("24k Rate/10gms", "", "₹${price24k.toStringAsFixed(2)}");
+                        }
+                      },
+                    ),
+
+
+                  if(carat == "22")
                   FutureBuilder<double?>(
                     future: GoldPriceService.fetch22kPrice(),
                     builder: (context, snapshot) {
@@ -386,6 +405,22 @@ class ProductTitleWidget extends StatelessWidget {
                       }
                     },
                   ),
+
+
+                  if(carat == "18")
+                    FutureBuilder<double?>(
+                      future: GoldPriceService.fetch18kPrice(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Text("Loading...", style: TextStyle(fontSize: 14));
+                        } else if (snapshot.hasError || snapshot.data == null) {
+                          return const Text("Rate Error", style: TextStyle(fontSize: 14, color: Colors.red));
+                        } else {
+                          double price18k = snapshot.data!;
+                          return buildPriceRow("18k Rate/10gms", "", "₹${price18k.toStringAsFixed(2)}");
+                        }
+                      },
+                    ),
 
                   buildPriceRow("Product Rate", "$weight gms", "₹${initPrice.toString()}"),
 
