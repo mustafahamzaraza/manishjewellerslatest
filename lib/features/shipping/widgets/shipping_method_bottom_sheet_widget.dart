@@ -77,7 +77,7 @@ class ShippingMethodBottomSheetWidgetState extends State<ShippingMethodBottomShe
                                       color: Theme.of(context).hintColor,),
                                     const SizedBox(width: Dimensions.paddingSizeSmall),
                                     Expanded(child: Text('${shippingController.shippingList![widget.sellerIndex].shippingMethodList![index].title}'
-                                        ' (Duration ${shippingController.shippingList![widget.sellerIndex].shippingMethodList![index].duration})'),),
+                                        ' (Charges)'),),
                                     const SizedBox(width: Dimensions.paddingSizeSmall),
 
                                     Text(' ${PriceConverter.convertPrice(context, shippingController.shippingList![widget.sellerIndex].shippingMethodList![index].cost)}',

@@ -42,13 +42,19 @@ class PaymentMethodBottomSheetWidgetState extends State<PaymentMethodBottomSheet
               Padding(padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-                  Text(getTranslated('choose_payment_method', context)??'',
-                      style: titilliumSemiBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                  // Text(getTranslated('choose_payment_method', context)??'',
+                  //     style: titilliumSemiBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
 
-                  Expanded(child: Padding(padding: const EdgeInsets.only(left: Dimensions.paddingSizeExtraSmall),
-                      child: Text('${getTranslated('click_one_of_the_option_below', context)}',
-                          style: textRegular.copyWith(color: Theme.of(context).hintColor,
-                              fontSize: Dimensions.fontSizeSmall))))])),
+                  // Expanded(
+                  //
+                  //     child: Padding(padding: const EdgeInsets.only(left: Dimensions.paddingSizeExtraSmall),
+                  //
+                  //     child: Text('${getTranslated('click_one_of_the_option_below', context)}',
+                  //         style: textRegular.copyWith(color: Theme.of(context).hintColor,
+                  //             fontSize: Dimensions.fontSizeSmall))))
+
+
+                ])),
 
 
               Column(crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,15 +64,17 @@ class PaymentMethodBottomSheetWidgetState extends State<PaymentMethodBottomSheet
                   Row(children: [
                     if(Provider.of<SplashController>(context, listen: false).configModel != null &&
                         Provider.of<SplashController>(context, listen: false).configModel!.cashOnDelivery! && !widget.onlyDigital)
-                    Expanded(child: CustomButton(
-                        isBorder: true,
-                      leftIcon: Images.cod,
-                      backgroundColor: checkoutProvider.codChecked? Theme.of(context).primaryColor : Theme.of(context).cardColor,
-                        textColor:  checkoutProvider.codChecked? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
-                        fontSize: Dimensions.fontSizeSmall,
-                        onTap: () => checkoutProvider.setOfflineChecked('cod'),
-                        buttonText: '${getTranslated('cash_on_delivery', context)}')),
-                    const SizedBox(width: Dimensions.paddingSizeDefault),
+                    // Expanded(
+                    //     child: CustomButton(
+                    //     isBorder: true,
+                    //   leftIcon: Images.cod,
+                    //   backgroundColor: checkoutProvider.codChecked? Theme.of(context).primaryColor : Theme.of(context).cardColor,
+                    //     textColor:  checkoutProvider.codChecked? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                    //     fontSize: Dimensions.fontSizeSmall,
+                    //     onTap: () => checkoutProvider.setOfflineChecked('cod'),
+                    //     buttonText: '${getTranslated('cash_on_delivery', context)}')
+                    // ),
+                    // const SizedBox(width: Dimensions.paddingSizeDefault),
 
                     if(Provider.of<SplashController>(context, listen: false).configModel != null &&
                         Provider.of<SplashController>(context, listen: false).configModel!.walletStatus! == 1 &&

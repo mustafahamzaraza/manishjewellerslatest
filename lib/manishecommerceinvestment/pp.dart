@@ -13,6 +13,7 @@ import '../utill/colornew.dart';
 import 'drawer.dart';
 import 'gb.dart';
 import 'getloan.dart';
+import 'goldpriceserv.dart';
 import 'ledger.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -1511,47 +1512,223 @@ class _PaymentHistoryListState extends State<PaymentHistoryList> {
     }
   }
 
+
   Widget _buildTransactionList() {
-    var filteredTransactions = getFilteredTransactions(); // Get filtered transactions based on search query and date filter
-
-
-//    [{payment_amount: 299.00, payment_date: January 29th, 2025, payment_time: 10:55 AM, payment_status: null, payment_type: null
+    var filteredTransactions = getFilteredTransactions();
 
     return ListView.builder(
       itemCount: filteredTransactions.length,
       itemBuilder: (context, index) {
         final payment = filteredTransactions[index];
+
+        double screenWidth = MediaQuery.of(context).size.width;
+        double screenHeight = MediaQuery.of(context).size.height;
+
+        // Scale font size based on screen width
+        double baseFontSize = screenWidth * 0.035; // ~14 on 400px wide screen
+        double smallFontSize = baseFontSize * 0.8;
+
         return Column(
           children: [
             ListTile(
+              leading: CircleAvatar(
+                radius: screenWidth * 0.07, // Scales with screen
+                backgroundColor: Colors.white,
+                backgroundImage: const AssetImage('assets/images/handshake.png'),
+              ),
 
-            leading: CircleAvatar(
-              radius: 37,
-              backgroundColor: Colors.white,
-                  backgroundImage: AssetImage('assets/images/handshake.png'),
-              // Local asset image
-                 ),
               title: Text(
                 '${payment['payment_date']}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: baseFontSize,
+                ),
               ),
-              subtitle: Text(payment['payment_time']),
-              trailing: Text(
-                '₹${payment['payment_amount']}',
-                style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 13),
+
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      payment['payment_time'],
+                      style: TextStyle(fontSize: baseFontSize),
+                    ),
+                  ),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "ACQUIRED GOLD :",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: smallFontSize,
+                          ),
+                        ),
+                        Text(
+                          "(ACQUIRED BY RATE)",
+                          style: TextStyle(fontSize: smallFontSize * 0.8),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              trailing: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  SizedBox(height: screenHeight * 0.01),
+
+                  Text(
+                    '₹${double.parse(payment['payment_amount'].toString()).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: smallFontSize,
+                    ),
+                  ),
+
+                  Text(
+                    '${double.parse(payment['purchase_gold_weight'].toString()).toStringAsFixed(1)} GM',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: smallFontSize * 1.1,
+                    ),
+                  ),
+
+                  FutureBuilder<double?>(
+                    future: GoldPriceService.fetch22kPrice(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text(
+                          "Loading...",
+                          style: TextStyle(fontSize: smallFontSize * 0.6),
+                        );
+                      } else if (snapshot.hasError || snapshot.data == null) {
+                        return Text(
+                          "Rate Error",
+                          style: TextStyle(
+                            fontSize: smallFontSize * 0.6,
+                            color: Colors.red,
+                          ),
+                        );
+                      } else {
+                        double price22k = snapshot.data!;
+                        return Text(
+                          "₹${price22k.toStringAsFixed(2)}",
+                          style: TextStyle(fontSize: smallFontSize * 0.7),
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
-            const Divider( // ✅ Adds a divider after each ListTile
+
+            Divider(
               thickness: 1,
               color: Colors.black,
-              indent: 15, // Optional: add padding on left
-              endIndent: 15, // Optional: add padding on right
+              indent: screenWidth * 0.04,
+              endIndent: screenWidth * 0.04,
             ),
           ],
         );
       },
     );
   }
+
+
+  // Widget _buildTransactionList() {
+  //   var filteredTransactions = getFilteredTransactions(); // Get filtered transactions based on search query and date filter
+  //
+  //   return ListView.builder(
+  //     itemCount: filteredTransactions.length,
+  //     itemBuilder: (context, index) {
+  //       final payment = filteredTransactions[index];
+  //       return Column(
+  //         children:  [
+  //           ListTile(
+  //             leading: CircleAvatar(
+  //             radius: 30,
+  //             backgroundColor: Colors.white,
+  //                 backgroundImage: AssetImage('assets/images/handshake.png'),
+  //                              ),
+  //             title: Text(
+  //               '${payment['payment_date']}',
+  //               style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 15),
+  //             ),
+  //
+  //
+  //             subtitle: Row(
+  //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //               children: [
+  //                 Column(
+  //                   mainAxisAlignment: MainAxisAlignment.start,
+  //                   children: [
+  //
+  //                     Text(payment['payment_time'],style: TextStyle(fontSize: 15),),
+  //                   ],
+  //                 ),
+  //
+  //                Column(
+  //                  children: [
+  //
+  //                    Text("ACQUIRED GOLD :",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 12),),
+  //                    Text("(ACQUIRED BY RATE)",style: TextStyle(fontSize: 9),),
+  //
+  //                  ],
+  //                ),
+  //
+  //
+  //               ],
+  //             ),
+  //
+  //             trailing: Column(
+  //               children: [
+  //
+  //                 SizedBox(height: 8),
+  //                 Text(
+  //                   '₹${double.parse(payment['payment_amount'].toString()).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}',
+  //                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+  //                 ),
+  //
+  //                 Text(
+  //                   '${double.parse(payment['purchase_gold_weight'].toString()).toStringAsFixed(1)} GM',
+  //                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
+  //                 ),
+  //
+  //                 SizedBox(height: 1),
+  //
+  //                   FutureBuilder<double?>(
+  //                     future: GoldPriceService.fetch22kPrice(),
+  //                     builder: (context, snapshot) {
+  //                       if (snapshot.connectionState == ConnectionState.waiting) {
+  //                         return const Text("Loading...", style: TextStyle(fontSize: 6));
+  //                       } else if (snapshot.hasError || snapshot.data == null) {
+  //                         return const Text("Rate Error", style: TextStyle(fontSize: 6, color: Colors.red));
+  //                       } else {
+  //                         double price22k = snapshot.data!;
+  //                         return Text("₹${price22k.toStringAsFixed(2)}",style: TextStyle(fontSize: 8),);
+  //                       }
+  //                     },
+  //                   ),
+  //
+  //
+  //               ],
+  //             ),
+  //           ),
+  //           const Divider( // ✅ Adds a divider after each ListTile
+  //             thickness: 1,
+  //             color: Colors.black,
+  //             indent: 15, // Optional: add padding on left
+  //             endIndent: 15, // Optional: add padding on right
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
 
 

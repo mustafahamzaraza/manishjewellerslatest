@@ -50,6 +50,7 @@ class AppConstants {
   static const String sellerList = '/api/v1/seller/list/';
   static const String trackingUri = '/api/v1/order/track?order_id=';
   static const String forgetPasswordUri = '/api/v1/auth/forgot-password';
+
   static const String getSupportTicketUri = '/api/v1/customer/support-ticket/get';
   static const String supportTicketConversationUri = '/api/v1/customer/support-ticket/conv/';
   static const String supportTicketReplyUri = '/api/v1/customer/support-ticket/reply/';
@@ -76,19 +77,31 @@ class AppConstants {
   static const String getCartDataUri = '/api/v1/cart';
   static const String addToCartUri = '/api/v1/cart/add';
   static const String updateCartQuantityUri = '/api/v1/cart/update';
+
   static const String removeFromCartUri = '/api/v1/cart/remove';
+
   static const String getShippingMethod = '/api/v1/shipping-method/by-seller';
+
   static const String chooseShippingMethod = '/api/v1/shipping-method/choose-for-order';
+
   static const String chosenShippingMethod = '/api/v1/shipping-method/chosen';
+
   static const String sendOtpToPhone = '/api/v1/auth/check-phone';
+
   static const String resendPhoneOtpUri = '/api/v1/auth/resend-otp-check-phone';
+
   static const String verifyPhoneUri = '/api/v1/auth/verify-phone';
+
   static const String socialLoginUri = '/api/v1/auth/social-customer-login';
   static const String sendOtpToEmail = '/api/v1/auth/check-email';
   static const String resendEmailOtpUri = '/api/v1/auth/resend-otp-check-email';
   static const String verifyEmailUri = '/api/v1/auth/verify-email';
+
   static const String resetPasswordUri = '/api/v1/auth/reset-password';
+
+
   static const String verifyOtpUri = '/api/v1/auth/verify-otp';
+
   static const String refundRequestUri = '/api/v1/customer/order/refund-store';
   static const String refundRequestPreReqUri = '/api/v1/customer/order/refund';
   static const String refundResultUri = '/api/v1/customer/order/refund-details';
